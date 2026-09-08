@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spotted — unsigned artist radar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #14171C;
+    --surface: #191D24;
+    --line: #2A2F38;
+    --text: #EDEAE3;
+    --text-muted: #8B9099;
+    --accent: #E8A33D;
+    --baseline: #3A6F6F;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: "tnum" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+    margin-bottom: 8px;
+  }
+
+  .wordmark {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .wordmark span { color: var(--accent); }
+
+  .meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  .tagline {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 10px 0 36px;
+  }
+
+  .count-line {
+    font-size: 15px;
+    margin-bottom: 28px;
+  }
+
+  .count-line strong { color: var(--accent); font-weight: 600; }
+
+  .row {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .handle {
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .genre-tag {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-left: 8px;
+    font-weight: 400;
+  }
+
+  .views {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .bar-track {
+    position: relative;
+    height: 6px;
+    background: var(--surface);
+    border-radius: 3px;
+    margin: 10px 0 8px;
+    overflow: visible;
+  }
+
+  .bar-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+  }
+
+  .bar-baseline-marker {
+    position: absolute;
+    top: -3px;
+    width: 2px;
+    height: 12px;
+    background: var(--baseline);
+  }
+
+  .bar-caption {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .bar-caption .multiple {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .caption-text {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+    line-height: 1.5;
+  }
+
+  .row-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+
+  .confidence {
+    color: var(--text-muted);
+  }
+
+  .empty-state {
+    padding: 60px 0;
+    text-align: center;
+  }
+
+  .empty-state p {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 440px;
+    margin: 10px auto 0;
+    line-height: 1.6;
+  }
+
+  .empty-state .big {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    color: var(--text);
+  }
+
+  .error-state {
+    padding: 60px 0;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .bar-fill { transition: width 0.6s ease; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1 class="wordmark">Spotted<span>.</span></h1>
+      <div class="meta" id="meta">loading…</div>
+    </header>
+    <p class="tagline">Daily radar for unsigned alternative, rock, singer-songwriter, folk &amp; americana artists whose latest video is running well above their normal range. US market.</p>
+
+    <div id="content">loading…</div>
+
+    <footer>
+      "Signed confidence" is a heuristic based on bio/caption text — it flags likely-unsigned artists but can't confirm label status. Verify before reaching out. An artist needs at least two prior sightings before a spike can be measured against their normal baseline.
+    </footer>
+  </div>
+
+<script>
+async function load() {
+  const metaEl = document.getElementById('meta');
+  const contentEl = document.getElementById('content');
+
+  let data;
+  try {
+    const res = await fetch('./data/latest.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('no data yet');
+    data = await res.json();
+  } catch (e) {
+    metaEl.textContent = '';
+    contentEl.innerHTML = `
+      <div class="error-state">
+        <p>No report yet. The first daily run hasn't completed, or hasn't been triggered manually.<br>
+        Check the repo's Actions tab.</p>
+      </div>`;
+    return;
+  }
+
+  const generated = new Date(data.generatedAt);
+  metaEl.textContent = data.marketScope + ' · updated ' + timeAgo(generated);
+
+  if (!data.artists || data.artists.length === 0) {
+    contentEl.innerHTML = `
+      <div class="empty-state">
+        <div class="big">No spikes today.</div>
+        <p>Normal in the first few days while artist history builds up — an artist needs a couple of prior sightings before we know what's typical for them.</p>
+      </div>`;
+    return;
+  }
+
+  contentEl.innerHTML = `<div class="count-line"><strong>${data.artists.length}</strong> artist${data.artists.length === 1 ? '' : 's'} running above their normal range today.</div>` +
+    data.artists.map(renderRow).join('');
+}
+
+function renderRow(a) {
+  const maxBar = Math.max(a.multiple * 1.15, 3);
+  const fillPct = Math.min((a.multiple / maxBar) * 100, 100);
+  const baselinePct = Math.min((1 / maxBar) * 100, 100);
+  const link = a.videoUrl
+    ? `<a href="${a.videoUrl}" target="_blank" rel="noopener">view video →</a>`
+    : `<span class="confidence">no link captured</span>`;
+
+  return `
+    <div class="row">
+      <div class="row-top">
+        <span class="handle">@${escapeHtml(a.handle)}<span class="genre-tag">${escapeHtml(a.genre || '')}</span></span>
+        <span class="views">${formatViews(a.views)} views</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${fillPct}%"></div>
+        <div class="bar-baseline-marker" style="left:${baselinePct}%"></div>
+      </div>
+      <div class="bar-caption">
+        <span>normal avg ${formatViews(a.baselineAvg)}</span>
+        <span class="multiple">${a.multiple}x normal</span>
+      </div>
+      ${a.caption ? `<p class="caption-text">${escapeHtml(a.caption)}</p>` : ''}
+      <div class="row-footer">
+        <span class="confidence">${escapeHtml(a.unsignedConfidence || '')}</span>
+        ${link}
+      </div>
+    </div>`;
+}
+
+function formatViews(n) {
+  if (n == null) return '—';
+  return Math.round(n).toLocaleString();
+}
+
+function timeAgo(date) {
+  const diffMs = Date.now() - date.getTime();
+  const hrs = Math.floor(diffMs / 3600000);
+  if (hrs < 1) return 'just now';
+  if (hrs === 1) return '1 hour ago';
+  if (hrs < 24) return hrs + ' hours ago';
+  const days = Math.floor(hrs / 24);
+  return days === 1 ? '1 day ago' : days + ' days ago';
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : str;
+  return div.innerHTML;
+}
+
+load();
+</script>
+</body>
+</html>
