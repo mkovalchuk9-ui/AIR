@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AIR</title>
+<title>AIR — unsigned artist radar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -161,10 +161,55 @@
     justify-content: space-between;
     align-items: center;
     font-size: 13px;
+    gap: 12px;
   }
 
   .confidence {
     color: var(--text-muted);
+  }
+
+  .row-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .embed-toggle {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .embed-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .embed-toggle:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .embed-toggle:disabled:hover {
+    border-color: var(--line);
+    color: var(--text);
+  }
+
+  .embed-container {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .embed-error {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
   }
 
   .empty-state {
@@ -255,15 +300,20 @@ async function load() {
 
   contentEl.innerHTML = `<div class="count-line"><strong>${data.artists.length}</strong> artist${data.artists.length === 1 ? '' : 's'} running above their normal range today.</div>` +
     data.artists.map(renderRow).join('');
+
+  attachEmbedHandlers();
 }
 
-function renderRow(a) {
+function renderRow(a, i) {
   const maxBar = Math.max(a.multiple * 1.15, 3);
   const fillPct = Math.min((a.multiple / maxBar) * 100, 100);
   const baselinePct = Math.min((1 / maxBar) * 100, 100);
   const link = a.videoUrl
-    ? `<a href="${a.videoUrl}" target="_blank" rel="noopener">view video →</a>`
+    ? `<a href="${a.videoUrl}" target="_blank" rel="noopener">view on TikTok →</a>`
     : `<span class="confidence">no link captured</span>`;
+  const playButton = a.videoUrl
+    ? `<button class="embed-toggle" data-index="${i}" data-video-url="${escapeHtml(a.videoUrl)}">▶ Play here</button>`
+    : `<button class="embed-toggle" disabled title="No video link captured">▶ Play here</button>`;
 
   return `
     <div class="row">
@@ -282,9 +332,59 @@ function renderRow(a) {
       ${a.caption ? `<p class="caption-text">${escapeHtml(a.caption)}</p>` : ''}
       <div class="row-footer">
         <span class="confidence">${escapeHtml(a.unsignedConfidence || '')}</span>
-        ${link}
+        <div class="row-actions">
+          ${playButton}
+          ${link}
+        </div>
       </div>
+      <div class="embed-container" id="embed-${i}" style="display:none;"></div>
     </div>`;
+}
+
+function attachEmbedHandlers() {
+  document.querySelectorAll('.embed-toggle[data-index]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const index = btn.getAttribute('data-index');
+      const videoUrl = btn.getAttribute('data-video-url');
+      toggleEmbed(index, videoUrl, btn);
+    });
+  });
+}
+
+function toggleEmbed(index, videoUrl, btn) {
+  const container = document.getElementById('embed-' + index);
+
+  if (container.dataset.loaded === 'true') {
+    const isHidden = container.style.display === 'none';
+    container.style.display = isHidden ? 'flex' : 'none';
+    btn.textContent = isHidden ? 'Hide video' : '▶ Play here';
+    return;
+  }
+
+  const videoId = extractVideoId(videoUrl);
+  if (!videoId) {
+    container.innerHTML = '<p class="embed-error">Couldn\'t load a player for this one — use the TikTok link instead.</p>';
+    container.dataset.loaded = 'true';
+    container.style.display = 'flex';
+    return;
+  }
+
+  container.innerHTML = `<blockquote class="tiktok-embed" cite="${videoUrl}" data-video-id="${videoId}" style="max-width:605px;min-width:325px;"><section></section></blockquote>`;
+  container.dataset.loaded = 'true';
+  container.style.display = 'flex';
+  btn.textContent = 'Hide video';
+
+  // TikTok's embed script only renders blockquotes present when it loads,
+  // so we re-inject it fresh each time to pick up newly added embeds.
+  const script = document.createElement('script');
+  script.src = 'https://www.tiktok.com/embed.js';
+  document.body.appendChild(script);
+}
+
+function extractVideoId(url) {
+  if (!url) return null;
+  const match = url.match(/\/video\/(\d+)/);
+  return match ? match[1] : null;
 }
 
 function formatViews(n) {
