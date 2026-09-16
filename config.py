@@ -98,15 +98,15 @@ MIN_ABSOLUTE_VIEWS = 5000       # ignore tiny accounts below this floor, even if
 # ---------------------------------------------------------------------------
 # SCRAPE BEHAVIOR
 # ---------------------------------------------------------------------------
-RESULTS_PER_QUERY = 5           # how many results Firecrawl returns per search query
+RESULTS_PER_QUERY = 5           # (legacy - no longer used by the hashtag-page scraper, kept in case you reintroduce search-based discovery)
 REQUEST_PAUSE_SECONDS = 2       # pause between Firecrawl calls to stay well under rate limits
 
-# COST NOTE: JSON-extraction scrapes cost 5 Firecrawl credits each (per the
-# Firecrawl pricing model at the time this was written). Rough daily cost =
-# (genres x markets x RESULTS_PER_QUERY x 5) + (market extra_tags x 5).
-# With defaults (13 genre tags x 4 markets x 5 results): ~1,300 credits/day.
-# START SMALL: cut GENRE_HASHTAGS down and/or run one market first to see
-# real costs against your Firecrawl plan before scaling up.
+# COST NOTE (updated): the scraper now does one JSON-extraction scrape per
+# signal hashtag per market (SIGNAL_HASHTAGS + each market's extra_tags).
+# With the current US-only config that's roughly 14 scrapes/day. At 5
+# credits each (Firecrawl's JSON-extraction cost at time of writing), that's
+# ~70 credits/day — comfortably within most plans. Add markets/hashtags
+# back in gradually and watch actual usage in your Firecrawl dashboard.
 
 # ---------------------------------------------------------------------------
 # STORAGE
