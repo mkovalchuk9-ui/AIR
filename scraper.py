@@ -1,28 +1,22 @@
 """
-Handles all Firecrawl calls.
+Handles all TikTok data collection via Apify's TikTok Scraper (built by
+Clockworks, maintained by Apify — one of the most widely used TikTok
+scrapers on the platform, purpose-built to handle TikTok's anti-bot defenses
+with rotating proxies etc.).
 
-REVISION NOTE: the original version of this file tried to find genre+signal
-matches via Firecrawl's /search (a general web search index) using queries
-like `site:tiktok.com "#folk" (#unsigned OR ...)`. That returned zero results
-in practice — TikTok hashtag/video content is JS-rendered and poorly indexed
-by general search engines, so there was rarely a matching page to even scrape.
+REVISION HISTORY:
+- v1 tried Firecrawl's /search (general web search index) — returned zero
+  results because TikTok content isn't well indexed by search engines.
+- v2 tried Firecrawl's direct scrape of TikTok hashtag pages — Firecrawl
+  explicitly does not support tiktok.com at all ("Website Not Supported"),
+  confirmed via their own error message. No amount of tuning fixes that.
+- v3 (this version) uses Apify's dedicated TikTok Scraper actor, which is
+  built specifically to get past TikTok's bot detection.
 
-This version scrapes real TikTok hashtag pages directly (the actual URLs,
-not a search for them), pulling from the unsigned-signal tags, and does
-genre matching afterward in Python by checking each video's caption/bio
-text against your genre keywords. This is more reliable because it always
-points at a real page, rather than hoping a search engine indexed one that
-matches a multi-hashtag query.
-
-IMPORTANT REALITY CHECK ON TIKTOK SCRAPING (still applies):
-TikTok is aggressively bot-protected. Firecrawl's headless-browser stack
-handles a lot of JS-rendered sites well, but TikTok pages can still return
-partial data, get rate limited, or get blocked outright. This script fails
-gracefully (skip and log) rather than crash. If "Collected 0 raw video
-records" persists after this change, the next thing to check is whether
-Firecrawl's own dashboard/logs show these specific scrape requests
-succeeding or erroring — that tells us if it's a Firecrawl-side block vs.
-something in our extraction logic.
+Each hashtag is run as its own Apify Actor call so we can cleanly tag which
+hashtag produced which result (mirrors the old Firecrawl-based structure).
+Genre matching still happens afterward in Python, since TikTok/Apify have
+no way to combine "genre AND unsigned-signal" in one query.
 """
 
 import os
@@ -30,55 +24,24 @@ import time
 import logging
 from typing import Any
 
-from firecrawl import Firecrawl
+from apify_client import ApifyClient
 
 import config
 
 logger = logging.getLogger("tiktok_scout.scraper")
 
+ACTOR_ID = "clockworks/tiktok-scraper"
 
-def get_client() -> Firecrawl:
-    api_key = os.environ.get("FIRECRAWL_API_KEY")
-    if not api_key:
+
+def get_client() -> ApifyClient:
+    token = os.environ.get("APIFY_API_TOKEN")
+    if not token:
         raise RuntimeError(
-            "FIRECRAWL_API_KEY is not set. This is your firecrawl.dev API key "
-            "(from your Firecrawl dashboard) — a separate thing from any Claude.ai "
-            "connector, since this script runs independently of Claude chat."
+            "APIFY_API_TOKEN is not set. Get one free at apify.com "
+            "(Settings > Integrations in Apify Console) and add it as a "
+            "GitHub Actions secret named APIFY_API_TOKEN."
         )
-    return Firecrawl(api_key=api_key)
-
-
-VIDEO_EXTRACT_PROMPT = """
-Extract every distinct TikTok video visible on this page. If this page did
-not load real TikTok content (e.g. it shows a login wall, captcha, or empty
-shell), return an empty videos list rather than guessing.
-"""
-
-# Explicit schema, rather than relying on the model to freely decide the
-# output shape from a text prompt alone. view_count stays a string since
-# TikTok displays it as "1.2M" / "45K" etc — analyzer.py's parser handles
-# converting that to an integer downstream.
-VIDEO_EXTRACT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "videos": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "creator_handle": {"type": "string"},
-                    "creator_display_name": {"type": "string"},
-                    "video_url": {"type": "string"},
-                    "caption_text": {"type": "string"},
-                    "view_count": {"type": "string"},
-                    "post_date_text": {"type": "string"},
-                    "bio_text": {"type": "string"},
-                },
-            },
-        }
-    },
-    "required": ["videos"],
-}
+    return ApifyClient(token)
 
 
 def matches_a_genre(caption_text, bio_text):
@@ -94,42 +57,48 @@ def matches_a_genre(caption_text, bio_text):
     return None
 
 
-def scrape_hashtag_page(tag: str, market: str) -> list[dict[str, Any]]:
-    """Scrape a real TikTok hashtag page directly."""
+def scrape_hashtag(tag: str, market: str) -> list[dict[str, Any]]:
+    """Run the Apify TikTok Scraper actor for a single hashtag."""
     client = get_client()
-    url = f"https://www.tiktok.com/tag/{tag}"
-    logger.info("Scraping hashtag page: %s (market=%s)", url, market)
+    logger.info("Scraping hashtag #%s via Apify (market=%s)", tag, market)
+
+    run_input = {
+        "hashtags": [tag],
+        "resultsPerPage": config.VIDEOS_PER_HASHTAG,
+        "proxyCountryCode": "None",
+        "shouldDownloadCovers": False,
+        "shouldDownloadVideos": False,
+        "shouldDownloadSubtitles": False,
+        "shouldDownloadSlideshowImages": False,
+    }
 
     try:
-        result = client.scrape(
-            url,
-            formats=[
-                {"type": "json", "prompt": VIDEO_EXTRACT_PROMPT, "schema": VIDEO_EXTRACT_SCHEMA}
-            ],
-            wait_for=6000,
-        )
+        run = client.actor(ACTOR_ID).call(run_input=run_input)
     except Exception as exc:  # noqa: BLE001 - log and continue, don't kill the whole run
-        logger.warning("Scrape failed for %s: %s", url, exc)
-        return []
-
-    extracted = getattr(result, "json", None) or {}
-    if not isinstance(extracted, dict):
-        logger.warning("Unexpected extraction shape for %s: %r", url, type(extracted))
-        return []
-
-    items = extracted.get("videos")
-    if not isinstance(items, list):
-        logger.info("No videos extracted from %s (page may not have loaded real content)", url)
+        logger.warning("Apify run failed for #%s: %s", tag, exc)
         return []
 
     videos = []
-    for item in items:
-        item["_source_url"] = url
-        item["_signal_tag"] = tag
-        item["_market"] = market
-        videos.append(item)
+    try:
+        for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+            author = item.get("authorMeta") or {}
+            videos.append({
+                "creator_handle": author.get("name"),
+                "creator_display_name": author.get("nickName"),
+                "video_url": item.get("webVideoUrl"),
+                "caption_text": item.get("text"),
+                "view_count": item.get("playCount"),
+                "post_date_text": item.get("createTimeISO"),
+                "bio_text": author.get("signature"),
+                "_source_url": item.get("webVideoUrl"),
+                "_signal_tag": tag,
+                "_market": market,
+            })
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Failed reading Apify dataset for #%s: %s", tag, exc)
+        return []
 
-    logger.info("Extracted %d video(s) from %s", len(videos), url)
+    logger.info("Got %d video(s) for #%s", len(videos), tag)
     time.sleep(config.REQUEST_PAUSE_SECONDS)
     return videos
 
@@ -144,7 +113,7 @@ def collect_all() -> list[dict[str, Any]]:
     for market, market_cfg in config.MARKETS.items():
         tags_to_scrape = list(config.SIGNAL_HASHTAGS) + list(market_cfg["extra_tags"])
         for tag in tags_to_scrape:
-            all_videos.extend(scrape_hashtag_page(tag, market))
+            all_videos.extend(scrape_hashtag(tag, market))
 
     logger.info("Collected %d raw video records (before genre filtering)", len(all_videos))
 
