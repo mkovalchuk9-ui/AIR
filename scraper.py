@@ -57,6 +57,20 @@ def matches_a_genre(caption_text, bio_text):
     return None
 
 
+def _get_dataset_id(run) -> str | None:
+    """
+    Apify's client can return the run result as either a dict or an object
+    with attributes depending on library version — handle both rather than
+    assuming one shape.
+    """
+    if isinstance(run, dict):
+        return run.get("defaultDatasetId")
+    for attr in ("default_dataset_id", "defaultDatasetId"):
+        if hasattr(run, attr):
+            return getattr(run, attr)
+    return None
+
+
 def scrape_hashtag(tag: str, market: str) -> list[dict[str, Any]]:
     """Run the Apify TikTok Scraper actor for a single hashtag."""
     client = get_client()
@@ -78,9 +92,14 @@ def scrape_hashtag(tag: str, market: str) -> list[dict[str, Any]]:
         logger.warning("Apify run failed for #%s: %s", tag, exc)
         return []
 
+    dataset_id = _get_dataset_id(run)
+    if not dataset_id:
+        logger.warning("Could not find dataset id in Apify run result for #%s: %r", tag, run)
+        return []
+
     videos = []
     try:
-        for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+        for item in client.dataset(dataset_id).iterate_items():
             author = item.get("authorMeta") or {}
             videos.append({
                 "creator_handle": author.get("name"),
