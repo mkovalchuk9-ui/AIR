@@ -98,15 +98,15 @@ MIN_ABSOLUTE_VIEWS = 5000       # ignore tiny accounts below this floor, even if
 # ---------------------------------------------------------------------------
 # SCRAPE BEHAVIOR
 # ---------------------------------------------------------------------------
-RESULTS_PER_QUERY = 5           # (legacy - no longer used by the hashtag-page scraper, kept in case you reintroduce search-based discovery)
-REQUEST_PAUSE_SECONDS = 2       # pause between Firecrawl calls to stay well under rate limits
+VIDEOS_PER_HASHTAG = 15         # how many videos Apify's TikTok Scraper returns per hashtag
+REQUEST_PAUSE_SECONDS = 2       # pause between Apify actor calls, courtesy pacing
 
-# COST NOTE (updated): the scraper now does one JSON-extraction scrape per
-# signal hashtag per market (SIGNAL_HASHTAGS + each market's extra_tags).
-# With the current US-only config that's roughly 14 scrapes/day. At 5
-# credits each (Firecrawl's JSON-extraction cost at time of writing), that's
-# ~70 credits/day — comfortably within most plans. Add markets/hashtags
-# back in gradually and watch actual usage in your Firecrawl dashboard.
+# COST NOTE (Apify pricing): roughly $0.03 per actor start + $0.004 per
+# video returned (pay-per-event pricing at time of writing). With ~14
+# hashtags/day at 15 videos each: 14 x $0.03 + (14 x 15) x $0.004 ≈ $1.26/day.
+# Apify's free tier includes $5 in starting credit, so you can test for
+# several days before spending anything. Check real usage in your Apify
+# console under Billing.
 
 # ---------------------------------------------------------------------------
 # STORAGE
