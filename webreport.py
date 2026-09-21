@@ -35,6 +35,7 @@ def _flagged_to_dict(f: Flagged) -> dict:
         "genre": f.genre_tag,
         "market": f.market,
         "unsignedConfidence": f.unsigned_confidence,
+        "postedDaysAgo": f.posted_days_ago,
     }
 
 
