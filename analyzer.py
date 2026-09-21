@@ -3,7 +3,8 @@ Turns raw scraped video records into a filtered, flagged shortlist:
   1. Normalizes/validates each record
   2. Applies the unsigned-vs-signed heuristic (bio keyword check)
   3. Computes each artist's rolling view-count baseline from history
-  4. Flags videos that spike well above that baseline
+  4. Filters to videos actually posted recently (not just currently popular)
+  5. Flags videos that spike well above that baseline
 """
 
 import logging
@@ -30,6 +31,7 @@ class Flagged:
     genre_tag: Optional[str]
     market: Optional[str]
     unsigned_confidence: str  # "likely_unsigned" | "unclear" | note if excluded upstream
+    posted_days_ago: Optional[int]  # None if TikTok didn't give us a parseable post date
 
 
 def _normalize_view_count(raw: Any) -> Optional[int]:
@@ -96,12 +98,34 @@ def process(raw_videos: list[dict[str, Any]], conn: sqlite3.Connection) -> list[
 
         history = storage.get_artist_history(conn, handle, before_timestamp=run_started_at)
 
+        posted_at = storage.parse_post_date(video.get("post_date_text"))
+        posted_days_ago = None
+        if posted_at is not None:
+            posted_days_ago = max(0, (run_started_at - posted_at) // 86400)
+
         # Always record the observation so history builds up over time,
         # even if we don't have enough data yet to flag it today.
         storage.record_observation(conn, video)
 
         if len(history) < config.MIN_HISTORY_POINTS:
             continue  # not enough history yet to judge "higher than normal"
+
+        # This is the fix for videos like an old, already-circulating post
+        # showing up as a "spike" just because it's still climbing slowly —
+        # the tool is meant to surface RECENTLY POSTED videos outperforming
+        # normal, not any video an artist has ever posted. If we couldn't
+        # determine a post date at all, we skip flagging it rather than
+        # assume it's recent — better to miss one than mislabel an old
+        # video as fresh.
+        if posted_days_ago is None:
+            logger.info("Skipping %s: no parseable post date, can't confirm recency", handle)
+            continue
+        if posted_days_ago > config.MAX_VIDEO_AGE_DAYS:
+            logger.info(
+                "Skipping %s: video is %d days old (max is %d)",
+                handle, posted_days_ago, config.MAX_VIDEO_AGE_DAYS,
+            )
+            continue
 
         baseline_avg = sum(history) / len(history)
         if baseline_avg <= 0:
@@ -127,6 +151,7 @@ def process(raw_videos: list[dict[str, Any]], conn: sqlite3.Connection) -> list[
                     genre_tag=video.get("_genre_tag"),
                     market=video.get("_market"),
                     unsigned_confidence=confidence_note(video.get("bio_text")),
+                    posted_days_ago=posted_days_ago,
                 )
             )
 
