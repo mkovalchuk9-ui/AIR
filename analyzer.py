@@ -1,129 +1,90 @@
 """
-Turns raw scraped video records into a filtered, flagged shortlist:
-  1. Normalizes/validates each record
-  2. Applies the unsigned-vs-signed heuristic (bio keyword check)
-  3. Computes each artist's rolling view-count baseline from history
-  4. Flags videos that spike well above that baseline
+Lightweight SQLite storage so we can build up a per-artist view-count
+history over time (needed to detect "higher than normal" spikes).
+The db file itself is committed back to the repo by the GitHub Actions
+workflow after each run, so history persists across daily runs.
 """
 
-import logging
 import sqlite3
-from dataclasses import dataclass
-from typing import Any, Optional
+import os
+import time
+from typing import Any
 
 import config
-import storage
 
-logger = logging.getLogger("tiktok_scout.analyzer")
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS video_observations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    creator_handle TEXT NOT NULL,
+    video_url TEXT,
+    view_count INTEGER,
+    caption_text TEXT,
+    bio_text TEXT,
+    genre_tag TEXT,
+    market TEXT,
+    observed_at INTEGER NOT NULL
+);
 
-
-@dataclass
-class Flagged:
-    creator_handle: str
-    creator_display_name: Optional[str]
-    video_url: Optional[str]
-    caption_text: Optional[str]
-    view_count: int
-    baseline_avg: float
-    multiple: float
-    genre_tag: Optional[str]
-    market: Optional[str]
-    unsigned_confidence: str  # "likely_unsigned" | "unclear" | note if excluded upstream
-
-
-def _normalize_view_count(raw: Any) -> Optional[int]:
-    if raw is None:
-        return None
-    if isinstance(raw, (int, float)):
-        return int(raw)
-    if isinstance(raw, str):
-        cleaned = raw.strip().lower().replace(",", "")
-        try:
-            if cleaned.endswith("k"):
-                return int(float(cleaned[:-1]) * 1_000)
-            if cleaned.endswith("m"):
-                return int(float(cleaned[:-1]) * 1_000_000)
-            if cleaned.endswith("b"):
-                return int(float(cleaned[:-1]) * 1_000_000_000)
-            return int(float(cleaned))
-        except ValueError:
-            return None
-    return None
+CREATE INDEX IF NOT EXISTS idx_creator ON video_observations (creator_handle);
+"""
 
 
-def looks_signed(bio_text: Optional[str], caption_text: Optional[str]) -> bool:
+def get_connection() -> sqlite3.Connection:
+    os.makedirs(os.path.dirname(config.DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(config.DB_PATH)
+    conn.executescript(SCHEMA)
+    return conn
+
+
+def record_observation(conn: sqlite3.Connection, video: dict[str, Any]) -> None:
+    conn.execute(
+        """
+        INSERT INTO video_observations
+            (creator_handle, video_url, view_count, caption_text, bio_text,
+             genre_tag, market, observed_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            video.get("creator_handle"),
+            video.get("video_url"),
+            video.get("view_count"),
+            video.get("caption_text"),
+            video.get("bio_text"),
+            video.get("_genre_tag"),
+            video.get("_market"),
+            int(time.time()),
+        ),
+    )
+
+
+def get_artist_history(
+    conn: sqlite3.Connection, creator_handle: str, before_timestamp: int
+) -> list[int]:
     """
-    Heuristic only. Returns True if we find a known-label mention in the
-    artist's bio or caption text. This will miss labels not on the list and
-    can occasionally false-positive (e.g. a cover song caption mentioning a
-    label). Treat the resulting shortlist as a starting point for manual
-    review, not a verified "unsigned" guarantee.
+    Return this artist's view counts recorded strictly BEFORE before_timestamp
+    — i.e. from prior runs, not from videos discovered in the current run.
+
+    This used to exclude by matching video_url instead, which was a bug:
+    an artist whose same video keeps reappearing under a hashtag day after
+    day would have every historical row filtered out (since it always
+    matched "the same video"), meaning they could never build history no
+    matter how many days passed. Cutting off by timestamp instead means a
+    slow-growing recurring video correctly compares against its own past
+    readings (usually ~1x, no false spike), while a genuinely new video
+    compares against the artist's prior distinct videos.
+
+    This also fixes a same-run contamination bug: a creator can appear
+    under multiple different hashtags in one run, producing several rows
+    with the same observed_at. Those siblings shouldn't count as "history"
+    for each other, and the timestamp cutoff naturally excludes them since
+    they're not before this run started.
     """
-    text = f"{bio_text or ''} {caption_text or ''}".lower()
-    return any(keyword in text for keyword in config.LABEL_EXCLUDE_KEYWORDS)
-
-
-def confidence_note(bio_text: Optional[str]) -> str:
-    text = (bio_text or "").lower()
-    if any(sig in text for sig in config.UNSIGNED_POSITIVE_SIGNALS):
-        return "likely_unsigned (bio confirms)"
-    return "unclear (no explicit bio signal — spot check)"
-
-
-def process(raw_videos: list[dict[str, Any]], conn: sqlite3.Connection) -> list[Flagged]:
-    flagged: list[Flagged] = []
-    seen_handles_this_run: set[str] = set()
-
-    for video in raw_videos:
-        handle = video.get("creator_handle")
-        if not handle:
-            continue
-
-        view_count = _normalize_view_count(video.get("view_count"))
-        if view_count is None or view_count < config.MIN_ABSOLUTE_VIEWS:
-            continue
-
-        if looks_signed(video.get("bio_text"), video.get("caption_text")):
-            logger.info("Excluding %s: label keyword match", handle)
-            continue
-
-        history = storage.get_artist_history(conn, handle, exclude_video_url=video.get("video_url"))
-
-        # Always record the observation so history builds up over time,
-        # even if we don't have enough data yet to flag it today.
-        storage.record_observation(conn, video)
-
-        if len(history) < config.MIN_HISTORY_POINTS:
-            continue  # not enough history yet to judge "higher than normal"
-
-        baseline_avg = sum(history) / len(history)
-        if baseline_avg <= 0:
-            continue
-
-        multiple = view_count / baseline_avg
-        if multiple >= config.SPIKE_MULTIPLIER:
-            # Avoid duplicate entries for the same artist within one run
-            dedup_key = f"{handle}:{video.get('video_url')}"
-            if dedup_key in seen_handles_this_run:
-                continue
-            seen_handles_this_run.add(dedup_key)
-
-            flagged.append(
-                Flagged(
-                    creator_handle=handle,
-                    creator_display_name=video.get("creator_display_name"),
-                    video_url=video.get("video_url"),
-                    caption_text=video.get("caption_text"),
-                    view_count=view_count,
-                    baseline_avg=round(baseline_avg, 1),
-                    multiple=round(multiple, 2),
-                    genre_tag=video.get("_genre_tag"),
-                    market=video.get("_market"),
-                    unsigned_confidence=confidence_note(video.get("bio_text")),
-                )
-            )
-
-    conn.commit()
-    flagged.sort(key=lambda f: f.multiple, reverse=True)
-    logger.info("Flagged %d videos as spikes", len(flagged))
-    return flagged
+    rows = conn.execute(
+        """
+        SELECT view_count FROM video_observations
+        WHERE creator_handle = ? AND observed_at < ?
+        ORDER BY observed_at DESC LIMIT 20
+        """,
+        (creator_handle, before_timestamp),
+    ).fetchall()
+    return [r[0] for r in rows if r[0] is not None]
