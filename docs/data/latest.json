@@ -1,6 +1,19 @@
 {
-  "generatedAt": "2026-09-21T19:40:48.342098+00:00",
+  "generatedAt": "2026-09-21T20:36:34.729681+00:00",
   "marketScope": "US",
-  "count": 0,
-  "artists": []
+  "count": 1,
+  "artists": [
+    {
+      "handle": "itsblythedavis",
+      "displayName": "Blythe Davis",
+      "videoUrl": "https://www.tiktok.com/@itsblythedavis/video/7677401635265645838",
+      "caption": "I like this a lot #independentartist #newmusic #singersongwriter #blythling #originalmusic ",
+      "views": 3600000,
+      "baselineAvg": 696525.0,
+      "multiple": 5.17,
+      "genre": "singersongwriter",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)"
+    }
+  ]
 }
