@@ -94,6 +94,7 @@ UNSIGNED_POSITIVE_SIGNALS = [
 MIN_HISTORY_POINTS = 1          # minimum prior videos on file before we trust a baseline
 SPIKE_MULTIPLIER = 1.8          # flag if current views >= this multiple of the artist's rolling average
 MIN_ABSOLUTE_VIEWS = 5000       # ignore tiny accounts below this floor, even if "spiking" relatively
+MAX_VIDEO_AGE_DAYS = 5         # only flag videos posted within this many days — otherwise an old, already-circulating video that's just slowly climbing looks identical to a genuinely new one taking off. Videos with no parseable post date are skipped rather than assumed recent.
 
 # ---------------------------------------------------------------------------
 # SCRAPE BEHAVIOR
