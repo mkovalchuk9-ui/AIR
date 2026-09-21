@@ -92,7 +92,7 @@ UNSIGNED_POSITIVE_SIGNALS = [
 # OUTLIER DETECTION
 # ---------------------------------------------------------------------------
 MIN_HISTORY_POINTS = 1          # minimum prior videos on file before we trust a baseline
-SPIKE_MULTIPLIER = 2.5          # flag if current views >= this multiple of the artist's rolling average
+SPIKE_MULTIPLIER = 1.8          # flag if current views >= this multiple of the artist's rolling average
 MIN_ABSOLUTE_VIEWS = 5000       # ignore tiny accounts below this floor, even if "spiking" relatively
 
 # ---------------------------------------------------------------------------
