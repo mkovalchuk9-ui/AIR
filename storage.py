@@ -8,7 +8,8 @@ workflow after each run, so history persists across daily runs.
 import sqlite3
 import os
 import time
-from typing import Any
+from datetime import datetime, timezone
+from typing import Any, Optional
 
 import config
 
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS video_observations (
     bio_text TEXT,
     genre_tag TEXT,
     market TEXT,
+    posted_at INTEGER,
     observed_at INTEGER NOT NULL
 );
 
@@ -33,7 +35,34 @@ def get_connection() -> sqlite3.Connection:
     os.makedirs(os.path.dirname(config.DB_PATH), exist_ok=True)
     conn = sqlite3.connect(config.DB_PATH)
     conn.executescript(SCHEMA)
+
+    # Migration for databases created before posted_at existed (yours,
+    # from earlier runs, is one of these) — add the column if missing
+    # rather than requiring a fresh database.
+    existing_cols = {row[1] for row in conn.execute("PRAGMA table_info(video_observations)")}
+    if "posted_at" not in existing_cols:
+        conn.execute("ALTER TABLE video_observations ADD COLUMN posted_at INTEGER")
+        conn.commit()
+
     return conn
+
+
+def parse_post_date(post_date_text: Optional[str]) -> Optional[int]:
+    """
+    Parse Apify's createTimeISO (e.g. "2026-08-21T14:32:10.000Z") into a
+    unix timestamp. Returns None if missing or unparseable — callers should
+    treat unknown post dates cautiously (see analyzer.py), not assume recency.
+    """
+    if not post_date_text:
+        return None
+    try:
+        cleaned = post_date_text.strip().replace("Z", "+00:00")
+        dt = datetime.fromisoformat(cleaned)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return int(dt.timestamp())
+    except (ValueError, TypeError):
+        return None
 
 
 def record_observation(conn: sqlite3.Connection, video: dict[str, Any]) -> None:
@@ -41,8 +70,8 @@ def record_observation(conn: sqlite3.Connection, video: dict[str, Any]) -> None:
         """
         INSERT INTO video_observations
             (creator_handle, video_url, view_count, caption_text, bio_text,
-             genre_tag, market, observed_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+             genre_tag, market, posted_at, observed_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             video.get("creator_handle"),
@@ -52,6 +81,7 @@ def record_observation(conn: sqlite3.Connection, video: dict[str, Any]) -> None:
             video.get("bio_text"),
             video.get("_genre_tag"),
             video.get("_market"),
+            parse_post_date(video.get("post_date_text")),
             int(time.time()),
         ),
     )
