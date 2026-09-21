@@ -316,6 +316,9 @@ function renderRow(a, i) {
   const playButton = a.videoUrl
     ? `<button class="embed-toggle" data-index="${i}" data-video-url="${escapeHtml(a.videoUrl)}">▶ Play here</button>`
     : `<button class="embed-toggle" disabled title="No video link captured">▶ Play here</button>`;
+  const postedLabel = a.postedDaysAgo === 0
+    ? 'posted today'
+    : (a.postedDaysAgo != null ? `posted ${a.postedDaysAgo}d ago` : '');
 
   return `
     <div class="row">
@@ -328,7 +331,7 @@ function renderRow(a, i) {
         <div class="bar-baseline-marker" style="left:${baselinePct}%"></div>
       </div>
       <div class="bar-caption">
-        <span>normal avg ${formatViews(a.baselineAvg)}</span>
+        <span>normal avg ${formatViews(a.baselineAvg)}${postedLabel ? ' · ' + postedLabel : ''}</span>
         <span class="multiple">${a.multiple}x normal</span>
       </div>
       ${a.caption ? `<p class="caption-text">${escapeHtml(a.caption)}</p>` : ''}
