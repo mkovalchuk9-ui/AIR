@@ -58,14 +58,33 @@ def record_observation(conn: sqlite3.Connection, video: dict[str, Any]) -> None:
 
 
 def get_artist_history(
-    conn: sqlite3.Connection, creator_handle: str, exclude_video_url: str | None = None
+    conn: sqlite3.Connection, creator_handle: str, before_timestamp: int
 ) -> list[int]:
-    """Return this artist's prior recorded view counts, most recent first."""
-    query = "SELECT view_count FROM video_observations WHERE creator_handle = ?"
-    params: list[Any] = [creator_handle]
-    if exclude_video_url:
-        query += " AND (video_url IS NULL OR video_url != ?)"
-        params.append(exclude_video_url)
-    query += " ORDER BY observed_at DESC LIMIT 20"
-    rows = conn.execute(query, params).fetchall()
+    """
+    Return this artist's view counts recorded strictly BEFORE before_timestamp
+    — i.e. from prior runs, not from videos discovered in the current run.
+
+    This used to exclude by matching video_url instead, which was a bug:
+    an artist whose same video keeps reappearing under a hashtag day after
+    day would have every historical row filtered out (since it always
+    matched "the same video"), meaning they could never build history no
+    matter how many days passed. Cutting off by timestamp instead means a
+    slow-growing recurring video correctly compares against its own past
+    readings (usually ~1x, no false spike), while a genuinely new video
+    compares against the artist's prior distinct videos.
+
+    This also fixes a same-run contamination bug: a creator can appear
+    under multiple different hashtags in one run, producing several rows
+    with the same observed_at. Those siblings shouldn't count as "history"
+    for each other, and the timestamp cutoff naturally excludes them since
+    they're not before this run started.
+    """
+    rows = conn.execute(
+        """
+        SELECT view_count FROM video_observations
+        WHERE creator_handle = ? AND observed_at < ?
+        ORDER BY observed_at DESC LIMIT 20
+        """,
+        (creator_handle, before_timestamp),
+    ).fetchall()
     return [r[0] for r in rows if r[0] is not None]
