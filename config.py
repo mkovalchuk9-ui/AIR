@@ -100,6 +100,7 @@ MAX_VIDEO_AGE_DAYS = 5         # only flag videos posted within this many days â
 # SCRAPE BEHAVIOR
 # ---------------------------------------------------------------------------
 VIDEOS_PER_HASHTAG = 15         # how many videos Apify's TikTok Scraper returns per hashtag
+PROFILE_VIDEOS_PER_ARTIST = 5   # how many of a discovered artist's own latest videos to check, sorted genuinely by recency
 REQUEST_PAUSE_SECONDS = 2       # pause between Apify actor calls, courtesy pacing
 
 # COST NOTE (Apify pricing): roughly $0.03 per actor start + $0.004 per
