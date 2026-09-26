@@ -1,6 +1,20 @@
 {
-  "generatedAt": "2026-09-25T13:29:59.942743+00:00",
+  "generatedAt": "2026-09-26T13:26:57.216034+00:00",
   "marketScope": "US",
-  "count": 0,
-  "artists": []
+  "count": 1,
+  "artists": [
+    {
+      "handle": "g.o.a.t.songs",
+      "displayName": "GOAT SONGS \ud83d\udc10",
+      "videoUrl": "https://www.tiktok.com/@g.o.a.t.songs/video/7689475194271845663",
+      "caption": "He started with his mature voice but went back to his teen voice\nJustin Bieber is officially back and better than ever, making a massive return to the stage as headliner for Coachella 2026.\nHis high-energy set on the Coachella Stage was a perfect mix of nostalgia and his new era, featuring fresh tracks from SWAG and SWAG II alongside a surprise guest appearance by The Kid LAROI for an epic performance of \"STAY.\" One of the most talked-about moments was his unique karaoke-style segment, where he vibed out to his own classics like\n\"Baby\" and \"Beauty and a Beat,\" proving he's still the king of the desert.\nIf you missed the live broadcast, you can still catch the magic through the YouTube livestream replays and witness this legendary comeback for yourself.\n#justinbieber #coachella #liveconcert #justinbieberfans\n#LivePerformance",
+      "views": 4700000,
+      "baselineAvg": 720380.0,
+      "multiple": 6.52,
+      "genre": "folk",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 0
+    }
+  ]
 }
