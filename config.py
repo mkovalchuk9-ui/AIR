@@ -121,3 +121,19 @@ DB_PATH = "data/history.db"
 # secrets) — never hardcode them here.
 # ---------------------------------------------------------------------------
 EMAIL_SUBJECT_PREFIX = "[TikTok Scout] Daily unsigned-artist report"
+
+# ---------------------------------------------------------------------------
+# SEARCH-BASED DISCOVERY (paul_44/tiktok-search actor)
+# ---------------------------------------------------------------------------
+DISCOVERY_QUERIES = [
+    ("alternative", "unsigned alternative artist"),
+    ("rock", "unsigned rock artist"),
+    ("singer songwriter", "unsigned singer songwriter"),
+    ("folk", "unsigned folk artist"),
+    ("americana", "unsigned americana artist"),
+]
+
+SEARCH_MAX_ITEMS = 15        # results per query
+SEARCH_DATE_RANGE = "7days"  # closest built-in option to our 5-day window; MAX_VIDEO_AGE_DAYS still narrows it further
+SEARCH_SORT_TYPE = "LATEST"  # newest matches first, not pre-filtered by popularity
+SEARCH_LOCATION = "US"
