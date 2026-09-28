@@ -1,20 +1,16 @@
 """
-Two-stage TikTok data collection via Apify's TikTok Scraper (Clockworks).
+TikTok data collection via paul_44/tiktok-search, a keyword-search Actor.
+Replaces the earlier two-stage hashtag-discovery + profile-recheck system.
 
-WHY TWO STAGES:
-Hashtag-mode results are ranked by popularity, not chronology — TikTok gives
-no way to ask a hashtag page for "just the newest posts." Testing showed
-this surfacing videos anywhere from 7 days old to over 6 years old under
-the same "unsigned" tags. A recency filter alone can't fix that if the
-underlying data was never recent to begin with.
+This actor searches TikTok's own search index by keyword (matching title,
+description, hashtags, and author info) and supports a native dateRange
+filter, so recency is enforced at the source in one call per genre.
 
-So: Stage 1 uses hashtag scraping only to DISCOVER candidate artist handles
-(what it's actually good at). Stage 2 re-queries each discovered artist's
-own profile with profileSorting="latest" — which genuinely does return
-their most recent uploads in order — and only those videos are evaluated
-for spikes. This costs roughly double the Apify calls (one extra per
-discovered artist) but actually delivers "recently posted video," which
-hashtag-only discovery could not.
+TRADEOFF: this actor doesn't return an artist's bio text, so the
+label-exclusion check can only scan video captions now, not bios.
+
+This is a smaller, community-built Actor, so check logs for failures
+the way you would for any new dependency.
 """
 
 import os
@@ -28,26 +24,18 @@ import config
 
 logger = logging.getLogger("tiktok_scout.scraper")
 
-ACTOR_ID = "clockworks/tiktok-scraper"
+ACTOR_ID = "paul_44/tiktok-search"
 
 
 def get_client() -> ApifyClient:
     token = os.environ.get("APIFY_API_TOKEN")
     if not token:
-        raise RuntimeError(
-            "APIFY_API_TOKEN is not set. Get one at apify.com "
-            "(Settings > Integrations in Apify Console) and add it as a "
-            "GitHub Actions secret named APIFY_API_TOKEN."
-        )
+        raise RuntimeError("APIFY_API_TOKEN is not set.")
     return ApifyClient(token)
 
 
 def _get_dataset_id(run) -> str | None:
-    """
-    Apify's client can return the run result as either a dict or an object
-    with attributes depending on library version — handle both rather than
-    assuming one shape.
-    """
+    """Apify's client may return a dict or an object depending on version."""
     if isinstance(run, dict):
         return run.get("defaultDatasetId")
     for attr in ("default_dataset_id", "defaultDatasetId"):
@@ -56,162 +44,76 @@ def _get_dataset_id(run) -> str | None:
     return None
 
 
-def matches_a_genre(caption_text, bio_text):
-    """
-    Check text against configured genre keywords. Returns the first
-    matching genre label, or None if nothing matches.
-    """
-    text = f"{caption_text or ''} {bio_text or ''}".lower()
-    for genre in config.GENRE_HASHTAGS:
-        if genre.lower() in text:
-            return genre
-    return None
+def matches_genre_term(caption_text: str | None, genre_term: str) -> bool:
+    """Sanity check that the video's caption actually mentions the genre word."""
+    text = (caption_text or "").lower()
+    return genre_term.lower() in text
 
 
-def _video_from_item(item: dict, extra: dict) -> dict:
-    author = item.get("authorMeta") or {}
-    video = {
-        "creator_handle": author.get("name"),
-        "creator_display_name": author.get("nickName"),
-        "video_url": item.get("webVideoUrl"),
-        "caption_text": item.get("text"),
-        "view_count": item.get("playCount"),
-        "post_date_text": item.get("createTimeISO"),
-        "bio_text": author.get("signature"),
-        "_source_url": item.get("webVideoUrl"),
-    }
-    video.update(extra)
-    return video
-
-
-# ---------------------------------------------------------------------------
-# STAGE 1 — discover candidate artists via hashtags
-# ---------------------------------------------------------------------------
-
-def discover_hashtag(tag: str, market: str) -> list[dict[str, Any]]:
-    """Run the actor in hashtag mode — used only for discovery, not scoring."""
+def search_genre(genre_label: str, query: str) -> list[dict[str, Any]]:
+    """Run one keyword search for a single genre's query."""
     client = get_client()
-    logger.info("Discovering via hashtag #%s (market=%s)", tag, market)
+    logger.info('Searching "%s" (genre=%s)', query, genre_label)
 
     run_input = {
-        "hashtags": [tag],
-        "resultsPerPage": config.VIDEOS_PER_HASHTAG,
-        "proxyCountryCode": "None",
-        "shouldDownloadCovers": False,
-        "shouldDownloadVideos": False,
-        "shouldDownloadSubtitles": False,
-        "shouldDownloadSlideshowImages": False,
+        "keywords": [query],
+        "maxItems": config.SEARCH_MAX_ITEMS,
+        "dateRange": config.SEARCH_DATE_RANGE,
+        "sortType": config.SEARCH_SORT_TYPE,
+        "location": config.SEARCH_LOCATION,
+        "strictKeywordMatch": False,
     }
 
     try:
         run = client.actor(ACTOR_ID).call(run_input=run_input)
     except Exception as exc:  # noqa: BLE001
-        logger.warning("Apify hashtag run failed for #%s: %s", tag, exc)
+        logger.warning('Search failed for "%s": %s', query, exc)
         return []
 
     dataset_id = _get_dataset_id(run)
     if not dataset_id:
-        logger.warning("No dataset id in hashtag run result for #%s", tag)
+        logger.warning('No dataset id in search result for "%s"', query)
         return []
 
     videos = []
     try:
         for item in client.dataset(dataset_id).iterate_items():
-            videos.append(_video_from_item(item, {"_signal_tag": tag, "_market": market}))
+            channel = item.get("channel") or {}
+            caption = item.get("title")
+
+            if item.get("keywordRelevance") == "none":
+                continue
+            if not matches_genre_term(caption, genre_label):
+                continue
+
+            videos.append({
+                "creator_handle": channel.get("username"),
+                "creator_display_name": channel.get("name"),
+                "video_url": item.get("url"),
+                "caption_text": caption,
+                "view_count": item.get("views"),
+                "post_date_text": item.get("uploadedAt"),
+                "bio_text": None,
+                "_source_url": item.get("url"),
+                "_signal_tag": None,
+                "_market": config.SEARCH_LOCATION,
+                "_genre_tag": genre_label,
+            })
     except Exception as exc:  # noqa: BLE001
-        logger.warning("Failed reading dataset for #%s: %s", tag, exc)
+        logger.warning('Failed reading dataset for "%s": %s', query, exc)
         return []
 
-    logger.info("Discovered %d video(s) under #%s", len(videos), tag)
-    time.sleep(config.REQUEST_PAUSE_SECONDS)
-    return videos
-
-
-# ---------------------------------------------------------------------------
-# STAGE 2 — pull each discovered artist's own latest videos (genuine recency)
-# ---------------------------------------------------------------------------
-
-def fetch_latest_for_profile(handle: str, genre_tag: str, market: str) -> list[dict[str, Any]]:
-    """
-    Ask the actor for this profile's own videos sorted by latest. Unlike
-    hashtag mode, profile mode genuinely supports chronological sorting.
-    """
-    client = get_client()
-    logger.info("Checking latest videos for @%s (genre=%s)", handle, genre_tag)
-
-    run_input = {
-        "profiles": [handle],
-        "profileSorting": "latest",
-        "resultsPerPage": config.PROFILE_VIDEOS_PER_ARTIST,
-        "proxyCountryCode": "None",
-        "shouldDownloadCovers": False,
-        "shouldDownloadVideos": False,
-        "shouldDownloadSubtitles": False,
-        "shouldDownloadSlideshowImages": False,
-    }
-
-    try:
-        run = client.actor(ACTOR_ID).call(run_input=run_input)
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("Apify profile run failed for @%s: %s", handle, exc)
-        return []
-
-    dataset_id = _get_dataset_id(run)
-    if not dataset_id:
-        logger.warning("No dataset id in profile run result for @%s", handle)
-        return []
-
-    videos = []
-    try:
-        for item in client.dataset(dataset_id).iterate_items():
-            videos.append(_video_from_item(
-                item, {"_signal_tag": None, "_market": market, "_genre_tag": genre_tag}
-            ))
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("Failed reading profile dataset for @%s: %s", handle, exc)
-        return []
-
-    logger.info("Got %d latest video(s) for @%s", len(videos), handle)
+    logger.info('Got %d relevant video(s) for "%s"', len(videos), query)
     time.sleep(config.REQUEST_PAUSE_SECONDS)
     return videos
 
 
 def collect_all() -> list[dict[str, Any]]:
-    """
-    Stage 1: sweep hashtags to discover candidate artists matching your
-    genres. Stage 2: re-check each discovered artist's own profile for
-    their genuinely latest videos, which is what actually gets returned
-    for scoring.
-    """
-    discovery_videos: list[dict[str, Any]] = []
-    for market, market_cfg in config.MARKETS.items():
-        tags = list(config.SIGNAL_HASHTAGS) + list(market_cfg["extra_tags"])
-        for tag in tags:
-            discovery_videos.extend(discover_hashtag(tag, market))
+    """One direct search per configured genre query."""
+    all_videos: list[dict[str, Any]] = []
 
-    logger.info("Stage 1 discovery: %d raw video records", len(discovery_videos))
+    for genre_label, query in config.DISCOVERY_QUERIES:
+        all_videos.extend(search_genre(genre_label, query))
 
-    # Genre attribution belongs to the ARTIST, decided once from whatever
-    # discovery video first matched — all of that artist's profile videos
-    # inherit it, rather than re-checking genre keywords against videos
-    # that may not individually mention the genre in their caption.
-    handle_to_genre: dict[str, str] = {}
-    handle_to_market: dict[str, str] = {}
-    for video in discovery_videos:
-        handle = video.get("creator_handle")
-        if not handle or handle in handle_to_genre:
-            continue
-        genre = matches_a_genre(video.get("caption_text"), video.get("bio_text"))
-        if genre:
-            handle_to_genre[handle] = genre
-            handle_to_market[handle] = video.get("_market")
-
-    logger.info("Stage 1 result: %d unique genre-matched artists to check", len(handle_to_genre))
-
-    final_videos: list[dict[str, Any]] = []
-    for handle, genre in handle_to_genre.items():
-        market = handle_to_market.get(handle, "US")
-        final_videos.extend(fetch_latest_for_profile(handle, genre, market))
-
-    logger.info("Stage 2 result: %d videos from genuinely-latest profile checks", len(final_videos))
-    return final_videos
+    logger.info("Collected %d video(s) across all genre searches", len(all_videos))
+    return all_videos
