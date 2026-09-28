@@ -2,9 +2,9 @@
 TikTok data collection via paul_44/tiktok-search, a keyword-search Actor.
 Replaces the earlier two-stage hashtag-discovery + profile-recheck system.
 
-This actor searches TikTok's own search index by keyword (matching title,
-description, hashtags, and author info) and supports a native dateRange
-filter, so recency is enforced at the source in one call per genre.
+This actor searches TikTok's own search index by keyword and supports a
+native dateRange filter, so recency is enforced at the source in one call
+per genre.
 
 TRADEOFF: this actor doesn't return an artist's bio text, so the
 label-exclusion check can only scan video captions now, not bios.
@@ -44,10 +44,30 @@ def _get_dataset_id(run) -> str | None:
     return None
 
 
-def matches_genre_term(caption_text: str | None, genre_term: str) -> bool:
-    """Sanity check that the video's caption actually mentions the genre word."""
-    text = (caption_text or "").lower()
-    return genre_term.lower() in text
+def _normalize(text: str) -> str:
+    """Lowercase and strip spaces/hyphens/underscores/# so that
+    'singer-songwriter', 'singer songwriter' and '#singersongwriter'
+    all compare equal."""
+    return "".join(ch for ch in text.lower() if ch.isalnum())
+
+
+def _hashtag_text(item: dict) -> str:
+    """Flatten the item's hashtags (list of strings or dicts) into one string."""
+    tags = item.get("hashtags") or []
+    parts = []
+    for tag in tags:
+        if isinstance(tag, str):
+            parts.append(tag)
+        elif isinstance(tag, dict):
+            parts.append(str(tag.get("name") or tag.get("title") or ""))
+    return " ".join(parts)
+
+
+def matches_genre_term(caption_text: str | None, hashtag_text: str, genre_term: str) -> bool:
+    """True if the genre word appears in the caption or hashtags,
+    ignoring case, spaces and hyphens."""
+    haystack = _normalize(f"{caption_text or ''} {hashtag_text}")
+    return _normalize(genre_term) in haystack
 
 
 def search_genre(genre_label: str, query: str) -> list[dict[str, Any]]:
@@ -76,14 +96,26 @@ def search_genre(genre_label: str, query: str) -> list[dict[str, Any]]:
         return []
 
     videos = []
+    raw_count = 0
+    dropped_relevance = 0
+    dropped_genre = 0
+    sample_dropped: list[str] = []
+
     try:
         for item in client.dataset(dataset_id).iterate_items():
+            raw_count += 1
             channel = item.get("channel") or {}
             caption = item.get("title")
 
             if item.get("keywordRelevance") == "none":
+                dropped_relevance += 1
+                if len(sample_dropped) < 3:
+                    sample_dropped.append(f"[relevance=none] {(caption or '')[:80]}")
                 continue
-            if not matches_genre_term(caption, genre_label):
+            if not matches_genre_term(caption, _hashtag_text(item), genre_label):
+                dropped_genre += 1
+                if len(sample_dropped) < 3:
+                    sample_dropped.append(f"[no genre word] {(caption or '')[:80]}")
                 continue
 
             videos.append({
@@ -103,7 +135,14 @@ def search_genre(genre_label: str, query: str) -> list[dict[str, Any]]:
         logger.warning('Failed reading dataset for "%s": %s', query, exc)
         return []
 
-    logger.info('Got %d relevant video(s) for "%s"', len(videos), query)
+    logger.info(
+        'DIAG "%s": actor returned %d | dropped for relevance=none: %d | '
+        'dropped for missing genre word: %d | kept: %d',
+        query, raw_count, dropped_relevance, dropped_genre, len(videos),
+    )
+    for sample in sample_dropped:
+        logger.info("DIAG   sample dropped -> %s", sample)
+
     time.sleep(config.REQUEST_PAUSE_SECONDS)
     return videos
 
