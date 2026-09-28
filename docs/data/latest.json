@@ -1,6 +1,20 @@
 {
-  "generatedAt": "2026-09-28T21:29:59.400184+00:00",
+  "generatedAt": "2026-09-28T21:44:43.029750+00:00",
   "marketScope": "US",
-  "count": 0,
-  "artists": []
+  "count": 1,
+  "artists": [
+    {
+      "handle": "headwiredband",
+      "displayName": "Headwired",
+      "videoUrl": "https://www.tiktok.com/@headwiredband/video/7689101825944931606",
+      "caption": "We\u2019re Headwired, a small unsigned band from the Black Country! This is our debut single \u2018Carousel\u2019 available to stream now! Our debut UK Tour has now SOLD OUT! However we are playing some showcase/support/festival shows, please see below: 26th September - Indie Ignition Showcase, the Ramp Horwich 15th October - O2 institute Birmingham, supporting Shed Seven 31st October - Barrowlands Ballroom, Glasgow, supporting Shed Seven 3rd November - Sceal & Sound event, Leamington Spa 23rd January - OUTLOUD festival, The Deaf Institute, Manchester  Which date will you be coming to? Tickets available via the link in our bio! #indierock #rocknroll #oasis #arcticmonkeys #indiemusic",
+      "views": 101800,
+      "baselineAvg": 10849.5,
+      "multiple": 9.38,
+      "genre": "alternative",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 4
+    }
+  ]
 }
