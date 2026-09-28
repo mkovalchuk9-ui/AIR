@@ -47,22 +47,34 @@ def get_connection() -> sqlite3.Connection:
     return conn
 
 
-def parse_post_date(post_date_text: Optional[str]) -> Optional[int]:
+def parse_post_date(post_date_value) -> Optional[int]:
     """
-    Parse Apify's createTimeISO (e.g. "2026-08-21T14:32:10.000Z") into a
-    unix timestamp. Returns None if missing or unparseable — callers should
-    treat unknown post dates cautiously (see analyzer.py), not assume recency.
+    Accepts either an epoch-seconds number (what the search actor returns as
+    uploadedAt) or an ISO date string. Returns a unix timestamp, or None if
+    missing/unparseable. Callers should treat unknown post dates cautiously
+    (see analyzer.py), not assume recency.
     """
-    if not post_date_text:
+    if post_date_value is None:
         return None
-    try:
-        cleaned = post_date_text.strip().replace("Z", "+00:00")
-        dt = datetime.fromisoformat(cleaned)
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        return int(dt.timestamp())
-    except (ValueError, TypeError):
-        return None
+    if isinstance(post_date_value, (int, float)):
+        value = int(post_date_value)
+        # Defensive: treat implausibly large values as milliseconds
+        return value // 1000 if value > 100_000_000_000 else value
+    if isinstance(post_date_value, str):
+        text = post_date_value.strip()
+        if not text:
+            return None
+        if text.isdigit():
+            value = int(text)
+            return value // 1000 if value > 100_000_000_000 else value
+        try:
+            dt = datetime.fromisoformat(text.replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return int(dt.timestamp())
+        except ValueError:
+            return None
+    return None
 
 
 def record_observation(conn: sqlite3.Connection, video: dict[str, Any]) -> None:
