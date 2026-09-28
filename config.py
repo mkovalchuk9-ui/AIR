@@ -126,11 +126,11 @@ EMAIL_SUBJECT_PREFIX = "[TikTok Scout] Daily unsigned-artist report"
 # SEARCH-BASED DISCOVERY (paul_44/tiktok-search actor)
 # ---------------------------------------------------------------------------
 DISCOVERY_QUERIES = [
-    ("alternative", "unsigned alternative artist"),
-    ("rock", "unsigned rock artist"),
-    ("singer songwriter", "unsigned singer songwriter"),
-    ("folk", "unsigned folk artist"),
-    ("americana", "unsigned americana artist"),
+    ("alternative", "alternative artist original song"),
+    ("rock", "rock band original music"),
+    ("singer songwriter", "singer songwriter original song"),
+    ("folk", "folk artist original song"),
+    ("americana", "americana artist original song"),
 ]
 
 SEARCH_MAX_ITEMS = 15        # results per query
