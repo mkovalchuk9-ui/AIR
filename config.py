@@ -1,77 +1,13 @@
 """
 Central configuration for the TikTok unsigned-artist scout.
-Edit this file to tune markets, genres, hashtags, and thresholds —
-you shouldn't need to touch scraper.py / analyzer.py / reporter.py for routine changes.
 """
 
-# ---------------------------------------------------------------------------
-# GENRES
-# ---------------------------------------------------------------------------
 GENRES = [
-    "alternative",
-    "rock",
-    "singer songwriter",
-    "folk",
-    "americana",
+    "alternative", "rock", "singer songwriter", "folk", "americana",
 ]
 
 # ---------------------------------------------------------------------------
-# HASHTAGS
-# "signal" tags = used to indicate the artist is unsigned/independent/new.
-# "genre" tags  = used to indicate the genre. These are paired together in
-# queries (genre + signal) rather than searched alone, since bare genre tags
-# return mostly signed/major-label content.
-# ---------------------------------------------------------------------------
-SIGNAL_HASHTAGS = [
-    "unsigned",
-    "unsignedartist",
-    "unsignedmusician",
-    "unsignedtalent",
-    "unreleased",
-    "newartist",
-    "independentartist",
-    "diymusician",
-    "originalmusic",
-    "undiscoveredartist",
-    "upcomingartist",
-    "musiciansoftiktok",
-]
-
-GENRE_HASHTAGS = [
-    "alternative",
-    "alternativemusic",
-    "rock",
-    "rockmusic",
-    "singersongwriter",
-    "singersongwriterlife",
-    "folk",
-    "folkmusic",
-    "indiefolk",
-    "indierock",
-    "altfolk",
-    "americana",
-    "americanamusic",
-]
-
-# ---------------------------------------------------------------------------
-# MARKETS
-# TikTok hashtag pages aren't natively geo-split, so "market" is approximated
-# via market-specific tag variants + spelling. Add/remove markets here.
-# Each market's `extra_tags` are appended to the genre+signal pairing pass.
-# ---------------------------------------------------------------------------
-MARKETS = {
-    "US": {"extra_tags": ["unsignedusa", "americanindieartist"]},
-    # Add markets back in later, e.g.:
-    # "UK": {"extra_tags": ["unsigneduk", "ukunsigned", "britishindieartist"]},
-    # "CA": {"extra_tags": ["unsignedcanada", "canadianindieartist"]},
-    # "AU": {"extra_tags": ["unsignedaustralia", "auindieartist", "unsignedaus"]},
-}
-
-# ---------------------------------------------------------------------------
-# LABEL EXCLUSION LIST (heuristic — not authoritative)
-# If any of these strings show up in an artist's bio/linktree text, they're
-# flagged as likely SIGNED and excluded from the report. This is a heuristic
-# safety net, not proof either way — spot-check borderline cases yourself.
+# LABEL EXCLUSION (heuristic — caption text only; this actor doesn't return bios)
 # ---------------------------------------------------------------------------
 LABEL_EXCLUDE_KEYWORDS = [
     "universal music", "umg", "sony music", "warner music", "wmg",
@@ -82,45 +18,37 @@ LABEL_EXCLUDE_KEYWORDS = [
     "record label:", "signed to",
 ]
 
-# Signals that reinforce "unsigned" (used only for logging/confidence, not a hard filter)
 UNSIGNED_POSITIVE_SIGNALS = [
     "unsigned", "independent artist", "indie artist", "diy musician",
     "no label", "self released", "self-released",
 ]
 
 # ---------------------------------------------------------------------------
+# COVER-SONG / NOSTALGIA-POST EXCLUSION (heuristic, caption text)
+# ---------------------------------------------------------------------------
+COVER_INDICATOR_PHRASES = [
+    "cover of", "(cover)", "cover)", "originally by", "made famous by",
+    "originally performed by", "oldiesbutgoodies", "throwback to",
+]
+COVER_YEAR_BY_PATTERN = r"\bby\b.{0,40}\(\d{4}\)"
+
+# ---------------------------------------------------------------------------
+# PROMOTIONAL / AGGREGATOR ACCOUNT EXCLUSION (heuristic, caption text)
+# ---------------------------------------------------------------------------
+PROMO_INDICATOR_PHRASES = [
+    "stream the talented", "check out this artist", "go listen to",
+    "discover new music", "new music alert", "go stream", "stream this artist",
+    "support this artist", "you need to hear this artist",
+]
+
+# ---------------------------------------------------------------------------
 # OUTLIER DETECTION
 # ---------------------------------------------------------------------------
-MIN_HISTORY_POINTS = 1          # minimum prior videos on file before we trust a baseline
-SPIKE_MULTIPLIER = 1.8          # flag if current views >= this multiple of the artist's rolling average
-MIN_ABSOLUTE_VIEWS = 5000       # ignore tiny accounts below this floor, even if "spiking" relatively
-MAX_VIDEO_AGE_DAYS = 5         # only flag videos posted within this many days — otherwise an old, already-circulating video that's just slowly climbing looks identical to a genuinely new one taking off. Videos with no parseable post date are skipped rather than assumed recent.
-
-# ---------------------------------------------------------------------------
-# SCRAPE BEHAVIOR
-# ---------------------------------------------------------------------------
-VIDEOS_PER_HASHTAG = 15         # how many videos Apify's TikTok Scraper returns per hashtag
-PROFILE_VIDEOS_PER_ARTIST = 5   # how many of a discovered artist's own latest videos to check, sorted genuinely by recency
-REQUEST_PAUSE_SECONDS = 2       # pause between Apify actor calls, courtesy pacing
-
-# COST NOTE (Apify pricing): roughly $0.03 per actor start + $0.004 per
-# video returned (pay-per-event pricing at time of writing). With ~14
-# hashtags/day at 15 videos each: 14 x $0.03 + (14 x 15) x $0.004 ≈ $1.26/day.
-# Apify's free tier includes $5 in starting credit, so you can test for
-# several days before spending anything. Check real usage in your Apify
-# console under Billing.
-
-# ---------------------------------------------------------------------------
-# STORAGE
-# ---------------------------------------------------------------------------
-DB_PATH = "data/history.db"
-
-# ---------------------------------------------------------------------------
-# EMAIL
-# Credentials are read from environment variables (set as GitHub Actions
-# secrets) — never hardcode them here.
-# ---------------------------------------------------------------------------
-EMAIL_SUBJECT_PREFIX = "[TikTok Scout] Daily unsigned-artist report"
+MIN_HISTORY_POINTS = 1
+SPIKE_MULTIPLIER = 1.8
+MIN_ABSOLUTE_VIEWS = 5000
+MAX_VIDEO_AGE_DAYS = 5
+MAX_FOLLOWER_COUNT = 100000
 
 # ---------------------------------------------------------------------------
 # SEARCH-BASED DISCOVERY (paul_44/tiktok-search actor)
@@ -133,7 +61,13 @@ DISCOVERY_QUERIES = [
     ("americana", "americana artist original song"),
 ]
 
-SEARCH_MAX_ITEMS = 15        # results per query
-SEARCH_DATE_RANGE = "7days"  # closest built-in option to our 5-day window; MAX_VIDEO_AGE_DAYS still narrows it further
-SEARCH_SORT_TYPE = "LATEST"  # newest matches first, not pre-filtered by popularity
+SEARCH_MAX_ITEMS = 15
+SEARCH_DATE_RANGE = "7days"
+SEARCH_SORT_TYPE = "LATEST"
 SEARCH_LOCATION = "US"
+REQUEST_PAUSE_SECONDS = 2
+
+# ---------------------------------------------------------------------------
+# STORAGE
+# ---------------------------------------------------------------------------
+DB_PATH = "data/history.db"
