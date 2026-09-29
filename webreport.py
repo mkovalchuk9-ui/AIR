@@ -1,11 +1,5 @@
 """
-Writes the day's flagged artists to docs/data/latest.json — a static file
-that the GitHub Pages site (docs/index.html) fetches at page load. No
-server, database, or email needed; GitHub Pages just serves the JSON as a
-static asset, updated by the same Actions job that runs the scan.
-
-Also appends a lightweight entry to docs/data/runs.json (date + count) so
-the page can show a small "last few days" trend without needing full history.
+Writes the day's flagged artists to docs/data/latest.json.
 """
 
 import json
@@ -36,6 +30,7 @@ def _flagged_to_dict(f: Flagged) -> dict:
         "market": f.market,
         "unsignedConfidence": f.unsigned_confidence,
         "postedDaysAgo": f.posted_days_ago,
+        "followerCount": f.follower_count,
     }
 
 
