@@ -1,17 +1,5 @@
 """
 TikTok data collection via paul_44/tiktok-search, a keyword-search Actor.
-Replaces the earlier two-stage hashtag-discovery + profile-recheck system.
-
-TUNING HISTORY:
-- v1 hard-filtered out anything the actor tagged keywordRelevance="none",
-  assuming that meant "unrelated." Real-world testing showed this dropping
-  genuinely on-target results (e.g. a band's own post that literally said
-  "small unsigned band" got thrown out this way) — so that filter was
-  actively hurting recall for reasons not fully understood, and was removed.
-- v2 (this version) trusts the search query itself as the targeting
-  mechanism (each query already names the genre, e.g. "unsigned rock
-  artist") rather than layering a second hard requirement that the genre
-  word appear verbatim in the caption too.
 """
 
 import os
@@ -36,7 +24,6 @@ def get_client() -> ApifyClient:
 
 
 def _get_dataset_id(run) -> str | None:
-    """Apify's client may return a dict or an object depending on version."""
     if isinstance(run, dict):
         return run.get("defaultDatasetId")
     for attr in ("default_dataset_id", "defaultDatasetId"):
@@ -46,7 +33,6 @@ def _get_dataset_id(run) -> str | None:
 
 
 def search_genre(genre_label: str, query: str) -> list[dict[str, Any]]:
-    """Run one keyword search for a single genre's query."""
     client = get_client()
     logger.info('Searching "%s" (genre=%s)', query, genre_label)
 
@@ -87,6 +73,7 @@ def search_genre(genre_label: str, query: str) -> list[dict[str, Any]]:
                 "view_count": item.get("views"),
                 "post_date_text": item.get("uploadedAt"),
                 "bio_text": None,
+                "follower_count": channel.get("followers"),
                 "_source_url": item.get("url"),
                 "_signal_tag": None,
                 "_market": config.SEARCH_LOCATION,
@@ -101,12 +88,29 @@ def search_genre(genre_label: str, query: str) -> list[dict[str, Any]]:
     return videos
 
 
+def _dedup_by_video_url(videos: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen: set[str] = set()
+    deduped = []
+    for video in videos:
+        url = video.get("video_url")
+        key = url or f"{video.get('creator_handle')}::{video.get('caption_text')}"
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(video)
+    return deduped
+
+
 def collect_all() -> list[dict[str, Any]]:
-    """One direct search per configured genre query."""
     all_videos: list[dict[str, Any]] = []
 
     for genre_label, query in config.DISCOVERY_QUERIES:
         all_videos.extend(search_genre(genre_label, query))
+
+    before_dedup = len(all_videos)
+    all_videos = _dedup_by_video_url(all_videos)
+    if before_dedup != len(all_videos):
+        logger.info("Deduped %d duplicate video(s) within this run", before_dedup - len(all_videos))
 
     logger.info("Collected %d video(s) across all genre searches", len(all_videos))
     return all_videos
