@@ -1,13 +1,9 @@
 """
-Turns raw scraped video records into a filtered, flagged shortlist:
-  1. Normalizes/validates each record
-  2. Applies the unsigned-vs-signed heuristic (bio keyword check)
-  3. Computes each artist's rolling view-count baseline from history
-  4. Filters to videos actually posted recently (not just currently popular)
-  5. Flags videos that spike well above that baseline
+Turns raw scraped video records into a filtered, flagged shortlist.
 """
 
 import logging
+import re
 import sqlite3
 import time
 from dataclasses import dataclass
@@ -17,6 +13,8 @@ import config
 import storage
 
 logger = logging.getLogger("tiktok_scout.analyzer")
+
+_COVER_YEAR_BY_RE = re.compile(config.COVER_YEAR_BY_PATTERN, re.IGNORECASE)
 
 
 @dataclass
@@ -30,8 +28,9 @@ class Flagged:
     multiple: float
     genre_tag: Optional[str]
     market: Optional[str]
-    unsigned_confidence: str  # "likely_unsigned" | "unclear" | note if excluded upstream
-    posted_days_ago: Optional[int]  # None if TikTok didn't give us a parseable post date
+    unsigned_confidence: str
+    posted_days_ago: Optional[int]
+    follower_count: Optional[int]
 
 
 def _normalize_view_count(raw: Any) -> Optional[int]:
@@ -55,15 +54,22 @@ def _normalize_view_count(raw: Any) -> Optional[int]:
 
 
 def looks_signed(bio_text: Optional[str], caption_text: Optional[str]) -> bool:
-    """
-    Heuristic only. Returns True if we find a known-label mention in the
-    artist's bio or caption text. This will miss labels not on the list and
-    can occasionally false-positive (e.g. a cover song caption mentioning a
-    label). Treat the resulting shortlist as a starting point for manual
-    review, not a verified "unsigned" guarantee.
-    """
     text = f"{bio_text or ''} {caption_text or ''}".lower()
     return any(keyword in text for keyword in config.LABEL_EXCLUDE_KEYWORDS)
+
+
+def looks_like_cover(caption_text: Optional[str]) -> bool:
+    text = (caption_text or "").lower()
+    if any(phrase in text for phrase in config.COVER_INDICATOR_PHRASES):
+        return True
+    if _COVER_YEAR_BY_RE.search(caption_text or ""):
+        return True
+    return False
+
+
+def looks_like_promo_account(caption_text: Optional[str]) -> bool:
+    text = (caption_text or "").lower()
+    return any(phrase in text for phrase in config.PROMO_INDICATOR_PHRASES)
 
 
 def confidence_note(bio_text: Optional[str]) -> str:
@@ -76,11 +82,6 @@ def confidence_note(bio_text: Optional[str]) -> str:
 def process(raw_videos: list[dict[str, Any]], conn: sqlite3.Connection) -> list[Flagged]:
     flagged: list[Flagged] = []
     seen_handles_this_run: set[str] = set()
-
-    # Captured once, before any of this run's observations are written.
-    # History for every video in this run is anything recorded strictly
-    # before this moment — see storage.get_artist_history for why this
-    # replaced the old "exclude by matching video_url" approach.
     run_started_at = int(time.time())
 
     for video in raw_videos:
@@ -92,8 +93,23 @@ def process(raw_videos: list[dict[str, Any]], conn: sqlite3.Connection) -> list[
         if view_count is None or view_count < config.MIN_ABSOLUTE_VIEWS:
             continue
 
-        if looks_signed(video.get("bio_text"), video.get("caption_text")):
+        follower_count = video.get("follower_count")
+        if follower_count is not None and follower_count > config.MAX_FOLLOWER_COUNT:
+            logger.info("Excluding %s: %d followers exceeds ceiling", handle, follower_count)
+            continue
+
+        caption = video.get("caption_text")
+
+        if looks_signed(video.get("bio_text"), caption):
             logger.info("Excluding %s: label keyword match", handle)
+            continue
+
+        if looks_like_cover(caption):
+            logger.info("Excluding %s: looks like a cover/nostalgia post", handle)
+            continue
+
+        if looks_like_promo_account(caption):
+            logger.info("Excluding %s: looks like a promo/aggregator account", handle)
             continue
 
         history = storage.get_artist_history(conn, handle, before_timestamp=run_started_at)
@@ -103,20 +119,11 @@ def process(raw_videos: list[dict[str, Any]], conn: sqlite3.Connection) -> list[
         if posted_at is not None:
             posted_days_ago = max(0, (run_started_at - posted_at) // 86400)
 
-        # Always record the observation so history builds up over time,
-        # even if we don't have enough data yet to flag it today.
         storage.record_observation(conn, video)
 
         if len(history) < config.MIN_HISTORY_POINTS:
-            continue  # not enough history yet to judge "higher than normal"
+            continue
 
-        # This is the fix for videos like an old, already-circulating post
-        # showing up as a "spike" just because it's still climbing slowly —
-        # the tool is meant to surface RECENTLY POSTED videos outperforming
-        # normal, not any video an artist has ever posted. If we couldn't
-        # determine a post date at all, we skip flagging it rather than
-        # assume it's recent — better to miss one than mislabel an old
-        # video as fresh.
         if posted_days_ago is None:
             logger.info("Skipping %s: no parseable post date, can't confirm recency", handle)
             continue
@@ -133,7 +140,6 @@ def process(raw_videos: list[dict[str, Any]], conn: sqlite3.Connection) -> list[
 
         multiple = view_count / baseline_avg
         if multiple >= config.SPIKE_MULTIPLIER:
-            # Avoid duplicate entries for the same artist within one run
             dedup_key = f"{handle}:{video.get('video_url')}"
             if dedup_key in seen_handles_this_run:
                 continue
@@ -144,7 +150,7 @@ def process(raw_videos: list[dict[str, Any]], conn: sqlite3.Connection) -> list[
                     creator_handle=handle,
                     creator_display_name=video.get("creator_display_name"),
                     video_url=video.get("video_url"),
-                    caption_text=video.get("caption_text"),
+                    caption_text=caption,
                     view_count=view_count,
                     baseline_avg=round(baseline_avg, 1),
                     multiple=round(multiple, 2),
@@ -152,6 +158,7 @@ def process(raw_videos: list[dict[str, Any]], conn: sqlite3.Connection) -> list[
                     market=video.get("_market"),
                     unsigned_confidence=confidence_note(video.get("bio_text")),
                     posted_days_ago=posted_days_ago,
+                    follower_count=follower_count,
                 )
             )
 
