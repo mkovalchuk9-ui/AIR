@@ -1,6 +1,21 @@
 {
-  "generatedAt": "2026-10-02T13:09:55.304476+00:00",
+  "generatedAt": "2026-10-03T18:20:15.323787+00:00",
   "marketScope": "US",
-  "count": 0,
-  "artists": []
+  "count": 1,
+  "artists": [
+    {
+      "handle": "laurenspencersmith",
+      "displayName": "laurenspencersmith",
+      "videoUrl": "https://www.tiktok.com/@laurenspencersmith/video/7691386118998117639",
+      "caption": "What should I call this song\u2026 #singersongwriter #breakup #vocals #sadsong #newmusic",
+      "views": 833700,
+      "baselineAvg": 305020.0,
+      "multiple": 2.73,
+      "genre": "singer songwriter",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 3,
+      "followerCount": null
+    }
+  ]
 }
