@@ -1,20 +1,62 @@
 {
-  "generatedAt": "2026-10-06T13:10:14.215576+00:00",
+  "generatedAt": "2026-10-07T13:13:04.501432+00:00",
   "marketScope": "US",
-  "count": 1,
+  "count": 4,
   "artists": [
+    {
+      "handle": "noahk4h4n",
+      "displayName": "\u1a12\u219f \ud81a\udc30",
+      "videoUrl": "https://www.tiktok.com/@noahk4h4n/video/7691884194439499038",
+      "caption": "I luv this one #noahkahan #noahkahanmusic #folk #music #original",
+      "views": 185600,
+      "baselineAvg": 24660.9,
+      "multiple": 7.53,
+      "genre": "folk",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 5,
+      "followerCount": null
+    },
+    {
+      "handle": "marksartormusic",
+      "displayName": "marksartormusic",
+      "videoUrl": "https://www.tiktok.com/@marksartormusic/video/7691697618606394631",
+      "caption": "\ud83d\ude4f just do it \u2764\ufe0f #indiefolk #chill #noahkahan #originalsong #originalsong",
+      "views": 20800,
+      "baselineAvg": 8511.5,
+      "multiple": 2.44,
+      "genre": "folk",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 5,
+      "followerCount": null
+    },
+    {
+      "handle": "giodaralovesongs",
+      "displayName": "giodarahq",
+      "videoUrl": "https://www.tiktok.com/@giodaralovesongs/video/7691793176813767969",
+      "caption": "Let\u2019s blow it up team!! #newmusic #folkmusic #originalsong #noahkahan #mumfordandsons",
+      "views": 33100,
+      "baselineAvg": 16600.0,
+      "multiple": 1.99,
+      "genre": "folk",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 5,
+      "followerCount": null
+    },
     {
       "handle": "aviram4music",
       "displayName": "Aviram",
       "videoUrl": "https://www.tiktok.com/@aviram4music/video/7692883384460217607",
       "caption": "POV: You\u2019re an Artist Who DIYs All His Own Visuals (Song: Aviram- Miss Lizz) #originalsong #guitar #indierock",
-      "views": 44600,
-      "baselineAvg": 14850.5,
-      "multiple": 3.0,
+      "views": 48000,
+      "baselineAvg": 24767.0,
+      "multiple": 1.94,
       "genre": "alternative",
       "market": "US",
       "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 1,
+      "postedDaysAgo": 2,
       "followerCount": null
     }
   ]
