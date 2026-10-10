@@ -1,20 +1,62 @@
 {
-  "generatedAt": "2026-10-09T13:13:01.606037+00:00",
+  "generatedAt": "2026-10-10T17:35:37.141467+00:00",
   "marketScope": "US",
-  "count": 1,
+  "count": 4,
   "artists": [
+    {
+      "handle": "ferestermusic",
+      "displayName": "Ferester",
+      "videoUrl": "https://www.tiktok.com/@ferestermusic/video/7694608437258276128",
+      "caption": "\u2018Long Way Home\u2019 out October 16th!! DM me \u2018Pre Save\u2019 and I\u2019ll send you the pre save early #folkmusic #indiefolk #originalsong",
+      "views": 41100,
+      "baselineAvg": 7914.8,
+      "multiple": 5.19,
+      "genre": "folk",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 1,
+      "followerCount": null
+    },
+    {
+      "handle": "magmacasino",
+      "displayName": "Magma Casino oficial",
+      "videoUrl": "https://www.tiktok.com/@magmacasino/video/7694420068452568338",
+      "caption": "\ud83d\udd25 \u00bfYa escuchaste a MAGMA CASINO? \ud83e\udd18\ud83c\udfb8 Rock hecho por nosotros, con toda la actitud y sin filtros. \ud83d\udd25 \ud83c\udfa7 Escucha la canci\u00f3n completa en YouTube y dinos qu\u00e9 te pareci\u00f3. \u00a1Queremos leerte en los comentarios! \u25b6\ufe0f https://youtu.be/xve6C2oSy-M S\u00edguenos para m\u00e1s m\u00fasica, videos y rock del bueno. \ud83e\udd18 #MagmaCasino #RockMexicano #RockOriginal #RockBand #MusicaIndependiente",
+      "views": 13300,
+      "baselineAvg": 5521.0,
+      "multiple": 2.41,
+      "genre": "rock",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 1,
+      "followerCount": null
+    },
+    {
+      "handle": "alicerosesings",
+      "displayName": "Alice Rose Lyn",
+      "videoUrl": "https://www.tiktok.com/@alicerosesings/video/7694314266521767182",
+      "caption": "My Memory's My Worst Enemy ##originalsong #singersongwriter #acoustic #newmusic #memories",
+      "views": 18600,
+      "baselineAvg": 8149.0,
+      "multiple": 2.28,
+      "genre": "singer songwriter",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 1,
+      "followerCount": null
+    },
     {
       "handle": "leylasabosings",
       "displayName": "Leyla Sabo",
       "videoUrl": "https://www.tiktok.com/@leylasabosings/video/7694216291674082581",
       "caption": "Enjoy x #original #originalmusic #singer #songwriter #cute",
-      "views": 40800,
-      "baselineAvg": 11361.5,
-      "multiple": 3.59,
+      "views": 44400,
+      "baselineAvg": 21174.3,
+      "multiple": 2.1,
       "genre": "singer songwriter",
       "market": "US",
       "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 1,
+      "postedDaysAgo": 2,
       "followerCount": null
     }
   ]
