@@ -1,34 +1,20 @@
 {
-  "generatedAt": "2026-10-16T17:09:02.795784+00:00",
+  "generatedAt": "2026-10-17T16:05:42.460982+00:00",
   "marketScope": "US",
-  "count": 2,
+  "count": 1,
   "artists": [
     {
-      "handle": ".crimson_vale",
-      "displayName": "Crimson Vale",
-      "videoUrl": "https://www.tiktok.com/@.crimson_vale/video/7695134632865516833",
-      "caption": "Where The Light Doesn't Reach\ud83d\udda4 Presave-Link in Bio\ud83e\udef6 #NewMusic #alternative #metalcore #emotionalsong #posthardcore",
-      "views": 148700,
-      "baselineAvg": 43545.9,
-      "multiple": 3.41,
-      "genre": "alternative",
+      "handle": "theslooband",
+      "displayName": "The Sloo",
+      "videoUrl": "https://www.tiktok.com/@theslooband/video/7696072547040890132",
+      "caption": "I Dont Want Easy - The Sloo. Studio clip of The Sloo with their new blues rock single I Don't Want Easy.  I Don't Want Easy is out now. #bluesrock #rocknroll #rockband #originalsong #countryrock",
+      "views": 307600,
+      "baselineAvg": 124200.0,
+      "multiple": 2.48,
+      "genre": "rock",
       "market": "US",
       "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 5,
-      "followerCount": null
-    },
-    {
-      "handle": "alicerosesings",
-      "displayName": "Alice Rose Lyn",
-      "videoUrl": "https://www.tiktok.com/@alicerosesings/video/7694319363662286094",
-      "caption": "Sometimes the memories hit hard #originalsong #singersongwriter #newmusic #memories #dubstep",
-      "views": 80600,
-      "baselineAvg": 34399.6,
-      "multiple": 2.34,
-      "genre": "singer songwriter",
-      "market": "US",
-      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 5,
+      "postedDaysAgo": 4,
       "followerCount": null
     }
   ]
