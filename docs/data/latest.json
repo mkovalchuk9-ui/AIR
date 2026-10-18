@@ -1,21 +1,6 @@
 {
-  "generatedAt": "2026-10-17T16:05:42.460982+00:00",
+  "generatedAt": "2026-10-18T16:17:44.633026+00:00",
   "marketScope": "US",
-  "count": 1,
-  "artists": [
-    {
-      "handle": "theslooband",
-      "displayName": "The Sloo",
-      "videoUrl": "https://www.tiktok.com/@theslooband/video/7696072547040890132",
-      "caption": "I Dont Want Easy - The Sloo. Studio clip of The Sloo with their new blues rock single I Don't Want Easy.  I Don't Want Easy is out now. #bluesrock #rocknroll #rockband #originalsong #countryrock",
-      "views": 307600,
-      "baselineAvg": 124200.0,
-      "multiple": 2.48,
-      "genre": "rock",
-      "market": "US",
-      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 4,
-      "followerCount": null
-    }
-  ]
+  "count": 0,
+  "artists": []
 }
