@@ -1,6 +1,21 @@
 {
-  "generatedAt": "2026-10-18T16:17:44.633026+00:00",
+  "generatedAt": "2026-10-19T18:57:33.046762+00:00",
   "marketScope": "US",
-  "count": 0,
-  "artists": []
+  "count": 1,
+  "artists": [
+    {
+      "handle": "giodaralovesongs",
+      "displayName": "giodarahq",
+      "videoUrl": "https://www.tiktok.com/@giodaralovesongs/video/7696937830857182496",
+      "caption": "What do we say??  #folkmusic #independentartist #originalsong #noahkahan #mumfordandsons",
+      "views": 74100,
+      "baselineAvg": 39870.7,
+      "multiple": 1.86,
+      "genre": "folk",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 4,
+      "followerCount": null
+    }
+  ]
 }
