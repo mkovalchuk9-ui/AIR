@@ -1,21 +1,6 @@
 {
-  "generatedAt": "2026-10-20T17:41:18.439848+00:00",
+  "generatedAt": "2026-10-21T17:50:20.831375+00:00",
   "marketScope": "US",
-  "count": 1,
-  "artists": [
-    {
-      "handle": "paiefilhaduorock",
-      "displayName": "Pai & Filha Duorock",
-      "videoUrl": "https://www.tiktok.com/@paiefilhaduorock/video/7698127564627365138",
-      "caption": "Mais uma da s\u00e9rie \"Um som com meu Pai\" A m\u00fasica \"Smoke on the Water\" da banda Deep Purple foi lan\u00e7ada originalmente em 1972 no \u00e1lbum Machine Head. Mais tarde, a faixa foi lan\u00e7ada em formato de single em maio de 1973 TODOS OS DIREITOS S\u00c3O RESERVADOS AOS SEUS DETENTORES  #anos70 #smokeonthewater #deeppurple #paiefilhaduorock  @Pai & Filha Duorock @Pai & Filha Duorock @Pai & Filha Duorock",
-      "views": 31800,
-      "baselineAvg": 16900.0,
-      "multiple": 1.88,
-      "genre": "rock",
-      "market": "US",
-      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 1,
-      "followerCount": null
-    }
-  ]
+  "count": 0,
+  "artists": []
 }
