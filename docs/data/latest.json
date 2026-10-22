@@ -1,6 +1,21 @@
 {
-  "generatedAt": "2026-10-21T17:50:20.831375+00:00",
+  "generatedAt": "2026-10-22T17:49:31.255050+00:00",
   "marketScope": "US",
-  "count": 0,
-  "artists": []
+  "count": 1,
+  "artists": [
+    {
+      "handle": "h_ikiko",
+      "displayName": "hikiko",
+      "videoUrl": "https://www.tiktok.com/@h_ikiko/video/7698115425950846229",
+      "caption": "#OriginalSong #SingerSongwriter #AcousticGuitar #indie",
+      "views": 39700,
+      "baselineAvg": 21500.0,
+      "multiple": 1.85,
+      "genre": "singer songwriter",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 3,
+      "followerCount": null
+    }
+  ]
 }
