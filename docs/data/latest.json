@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-10-22T17:49:31.255050+00:00",
+  "generatedAt": "2026-10-23T17:39:21.477011+00:00",
   "marketScope": "US",
   "count": 1,
   "artists": [
     {
-      "handle": "h_ikiko",
-      "displayName": "hikiko",
-      "videoUrl": "https://www.tiktok.com/@h_ikiko/video/7698115425950846229",
-      "caption": "#OriginalSong #SingerSongwriter #AcousticGuitar #indie",
-      "views": 39700,
-      "baselineAvg": 21500.0,
-      "multiple": 1.85,
+      "handle": "realarlie",
+      "displayName": "Arlie",
+      "videoUrl": "https://www.tiktok.com/@realarlie/video/7699779758774668576",
+      "caption": "song : Hoping - Arlie available on all music platforms link in bio :) . #singer #singersongwriter #originalsong #newmusic",
+      "views": 16300,
+      "baselineAvg": 7388.5,
+      "multiple": 2.21,
       "genre": "singer songwriter",
       "market": "US",
       "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 3,
+      "postedDaysAgo": 0,
       "followerCount": null
     }
   ]
