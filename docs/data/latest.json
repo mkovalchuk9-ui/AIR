@@ -1,20 +1,48 @@
 {
-  "generatedAt": "2026-10-24T16:25:30.423381+00:00",
+  "generatedAt": "2026-10-25T16:57:43.241214+00:00",
   "marketScope": "US",
-  "count": 1,
+  "count": 3,
   "artists": [
     {
-      "handle": "_hangsung_e",
-      "displayName": "_HangsungE_",
-      "videoUrl": "https://www.tiktok.com/@_hangsung_e/video/7699916379130006804",
-      "caption": "#newmusic #originalsongs #indieartists",
-      "views": 32300,
-      "baselineAvg": 5302.0,
-      "multiple": 6.09,
+      "handle": "rudilloydbenson",
+      "displayName": "Rudi Lloyd-Benson",
+      "videoUrl": "https://www.tiktok.com/@rudilloydbenson/video/7699583083447733526",
+      "caption": "yeahhh bc only the kindest souls will find this fr #newartist #singersongwriter #originalsong #fyp",
+      "views": 142600,
+      "baselineAvg": 9307.0,
+      "multiple": 15.32,
+      "genre": "singer songwriter",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 2,
+      "followerCount": null
+    },
+    {
+      "handle": "musicmandan12",
+      "displayName": "Musicmandan12 \ud83c\udfa4\ud83c\udfb6\u2728\ufe0f",
+      "videoUrl": "https://www.tiktok.com/@musicmandan12/video/7699581581769428238",
+      "caption": "#musicianlife #bestvoicesontiktok #singersoftiktok #singersongwriter #originalsong  I just did this freestyle this morning. Some thoughts in my head about the world. Original song by me. Danny",
+      "views": 21300,
+      "baselineAvg": 8858.0,
+      "multiple": 2.4,
+      "genre": "singer songwriter",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 2,
+      "followerCount": null
+    },
+    {
+      "handle": "_hangsung_",
+      "displayName": "\ud589\uc131 \ud835\udddb\ud835\uddd4\ud835\udde1\ud835\uddda\ud835\udde6\ud835\udde8\ud835\udde1\ud835\uddda",
+      "videoUrl": "https://www.tiktok.com/@_hangsung_/video/7699872658527227156",
+      "caption": "new indie for u #newmusic #malcolmtodd #wavetoearth #originalsongs #indieartists",
+      "views": 17100,
+      "baselineAvg": 9265.1,
+      "multiple": 1.85,
       "genre": "alternative",
       "market": "US",
       "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 0,
+      "postedDaysAgo": 2,
       "followerCount": null
     }
   ]
