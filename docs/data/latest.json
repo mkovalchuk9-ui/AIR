@@ -1,34 +1,20 @@
 {
-  "generatedAt": "2026-10-25T16:57:43.241214+00:00",
+  "generatedAt": "2026-10-26T18:59:35.180110+00:00",
   "marketScope": "US",
-  "count": 3,
+  "count": 2,
   "artists": [
     {
-      "handle": "rudilloydbenson",
-      "displayName": "Rudi Lloyd-Benson",
-      "videoUrl": "https://www.tiktok.com/@rudilloydbenson/video/7699583083447733526",
-      "caption": "yeahhh bc only the kindest souls will find this fr #newartist #singersongwriter #originalsong #fyp",
-      "views": 142600,
-      "baselineAvg": 9307.0,
-      "multiple": 15.32,
+      "handle": "realarlie",
+      "displayName": "Arlie",
+      "videoUrl": "https://www.tiktok.com/@realarlie/video/7699779758774668576",
+      "caption": "song : Hoping - Arlie available on all music platforms link in bio :) . #singer #singersongwriter #originalsong #newmusic",
+      "views": 30400,
+      "baselineAvg": 10359.0,
+      "multiple": 2.93,
       "genre": "singer songwriter",
       "market": "US",
       "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 2,
-      "followerCount": null
-    },
-    {
-      "handle": "musicmandan12",
-      "displayName": "Musicmandan12 \ud83c\udfa4\ud83c\udfb6\u2728\ufe0f",
-      "videoUrl": "https://www.tiktok.com/@musicmandan12/video/7699581581769428238",
-      "caption": "#musicianlife #bestvoicesontiktok #singersoftiktok #singersongwriter #originalsong  I just did this freestyle this morning. Some thoughts in my head about the world. Original song by me. Danny",
-      "views": 21300,
-      "baselineAvg": 8858.0,
-      "multiple": 2.4,
-      "genre": "singer songwriter",
-      "market": "US",
-      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 2,
+      "postedDaysAgo": 3,
       "followerCount": null
     },
     {
@@ -36,13 +22,13 @@
       "displayName": "\ud589\uc131 \ud835\udddb\ud835\uddd4\ud835\udde1\ud835\uddda\ud835\udde6\ud835\udde8\ud835\udde1\ud835\uddda",
       "videoUrl": "https://www.tiktok.com/@_hangsung_/video/7699872658527227156",
       "caption": "new indie for u #newmusic #malcolmtodd #wavetoearth #originalsongs #indieartists",
-      "views": 17100,
-      "baselineAvg": 9265.1,
-      "multiple": 1.85,
+      "views": 18100,
+      "baselineAvg": 9836.3,
+      "multiple": 1.84,
       "genre": "alternative",
       "market": "US",
       "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 2,
+      "postedDaysAgo": 3,
       "followerCount": null
     }
   ]
