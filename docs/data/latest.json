@@ -1,48 +1,20 @@
 {
-  "generatedAt": "2026-10-28T18:37:15.356201+00:00",
+  "generatedAt": "2026-10-29T18:46:49.611637+00:00",
   "marketScope": "US",
-  "count": 3,
+  "count": 1,
   "artists": [
-    {
-      "handle": "nedhollandddd",
-      "displayName": "Ned Holland",
-      "videoUrl": "https://www.tiktok.com/@nedhollandddd/video/7701058304839011616",
-      "caption": "Can u copy link for me pl?? \ud83d\ude4f #originalsong #independentartist #indiefolk #neofolk #musictok",
-      "views": 202800,
-      "baselineAvg": 18820.8,
-      "multiple": 10.78,
-      "genre": "folk",
-      "market": "US",
-      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 1,
-      "followerCount": null
-    },
     {
       "handle": "rudilloydbenson",
       "displayName": "Rudi Lloyd-Benson",
       "videoUrl": "https://www.tiktok.com/@rudilloydbenson/video/7700355147427335446",
       "caption": "waiting for the radiohead fans to arrive #newartist #singersongwriter #originalsong #fyp",
-      "views": 222700,
-      "baselineAvg": 36406.3,
-      "multiple": 6.12,
+      "views": 245200,
+      "baselineAvg": 53714.8,
+      "multiple": 4.56,
       "genre": "singer songwriter",
       "market": "US",
       "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 3,
-      "followerCount": null
-    },
-    {
-      "handle": "rudilloydbenson",
-      "displayName": "Rudi Lloyd-Benson",
-      "videoUrl": "https://www.tiktok.com/@rudilloydbenson/video/7699583083447733526",
-      "caption": "yeahhh bc only the kindest souls will find this fr #newartist #singersongwriter #originalsong #fyp",
-      "views": 209700,
-      "baselineAvg": 36406.3,
-      "multiple": 5.76,
-      "genre": "singer songwriter",
-      "market": "US",
-      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 5,
+      "postedDaysAgo": 4,
       "followerCount": null
     }
   ]
