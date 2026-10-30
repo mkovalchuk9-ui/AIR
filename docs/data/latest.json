@@ -1,20 +1,34 @@
 {
-  "generatedAt": "2026-10-29T18:46:49.611637+00:00",
+  "generatedAt": "2026-10-30T18:23:23.745969+00:00",
   "marketScope": "US",
-  "count": 1,
+  "count": 2,
   "artists": [
     {
       "handle": "rudilloydbenson",
       "displayName": "Rudi Lloyd-Benson",
       "videoUrl": "https://www.tiktok.com/@rudilloydbenson/video/7700355147427335446",
       "caption": "waiting for the radiohead fans to arrive #newartist #singersongwriter #originalsong #fyp",
-      "views": 245200,
-      "baselineAvg": 53714.8,
-      "multiple": 4.56,
+      "views": 264700,
+      "baselineAvg": 80341.9,
+      "multiple": 3.29,
       "genre": "singer songwriter",
       "market": "US",
       "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 4,
+      "postedDaysAgo": 5,
+      "followerCount": null
+    },
+    {
+      "handle": "ell1smusic",
+      "displayName": "ELL!S",
+      "videoUrl": "https://www.tiktok.com/@ell1smusic/video/7702104420951084310",
+      "caption": "can you copy link for me pls \ud83d\ude4f#smallartist #originalsong #alternativemusic #musictok",
+      "views": 27800,
+      "baselineAvg": 11400.0,
+      "multiple": 2.44,
+      "genre": "alternative",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 1,
       "followerCount": null
     }
   ]
