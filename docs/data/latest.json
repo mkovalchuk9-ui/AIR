@@ -1,21 +1,6 @@
 {
-  "generatedAt": "2026-10-31T17:29:22.513166+00:00",
+  "generatedAt": "2026-11-01T18:15:27.166339+00:00",
   "marketScope": "US",
-  "count": 1,
-  "artists": [
-    {
-      "handle": "nedhollandddd",
-      "displayName": "Ned Holland",
-      "videoUrl": "https://www.tiktok.com/@nedhollandddd/video/7702009965069815073",
-      "caption": "Can u copy link for me pl?? \ud83d\ude4f #originalsong #independentartist #indiefolk #neofolk #musictok",
-      "views": 64800,
-      "baselineAvg": 35598.8,
-      "multiple": 1.82,
-      "genre": "folk",
-      "market": "US",
-      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 2,
-      "followerCount": null
-    }
-  ]
+  "count": 0,
+  "artists": []
 }
