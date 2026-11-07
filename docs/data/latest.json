@@ -1,34 +1,20 @@
 {
-  "generatedAt": "2026-11-06T19:48:33.123332+00:00",
+  "generatedAt": "2026-11-07T17:56:29.463057+00:00",
   "marketScope": "US",
-  "count": 2,
+  "count": 1,
   "artists": [
     {
-      "handle": "evilapsalar",
-      "displayName": "Apsalar",
-      "videoUrl": "https://www.tiktok.com/@evilapsalar/video/7704768401431940366",
-      "caption": "Hunting For Morels by Apsalar #indiefolkmusic #indiemusician #unsignedartist #originalsong #originalmusic",
-      "views": 69500,
-      "baselineAvg": 6578.2,
-      "multiple": 10.57,
-      "genre": "folk",
+      "handle": "theslooband",
+      "displayName": "The Sloo",
+      "videoUrl": "https://www.tiktok.com/@theslooband/video/7704980980649528577",
+      "caption": "I Dont Want Easy - The Sloo. The Sloo with their new blues rock single I Don't Want Easy. I Don't Want Easy is out now. #bluesrock #rocknroll #rockband #originalsong #countryrock",
+      "views": 276800,
+      "baselineAvg": 133079.3,
+      "multiple": 2.08,
+      "genre": "rock",
       "market": "US",
       "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
       "postedDaysAgo": 1,
-      "followerCount": null
-    },
-    {
-      "handle": "alicerosesings",
-      "displayName": "Alice Rose Lyn",
-      "videoUrl": "https://www.tiktok.com/@alicerosesings/video/7702874329431674125",
-      "caption": "Sometimes, it helps to put it in words #originalsong #singersongwriter #newmusic #piano #breakup",
-      "views": 78900,
-      "baselineAvg": 43297.4,
-      "multiple": 1.82,
-      "genre": "singer songwriter",
-      "market": "US",
-      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
-      "postedDaysAgo": 5,
       "followerCount": null
     }
   ]
