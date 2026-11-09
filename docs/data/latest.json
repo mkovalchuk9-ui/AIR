@@ -1,6 +1,21 @@
 {
-  "generatedAt": "2026-11-08T18:12:09.037205+00:00",
+  "generatedAt": "2026-11-09T22:50:10.645108+00:00",
   "marketScope": "US",
-  "count": 0,
-  "artists": []
+  "count": 1,
+  "artists": [
+    {
+      "handle": "nedhollandddd",
+      "displayName": "Ned Holland",
+      "videoUrl": "https://www.tiktok.com/@nedhollandddd/video/7705754271354031382",
+      "caption": "Can you copy link for me plz?? \ud83d\ude4f #folk #originalmusic #independentartist #musictok #newartist",
+      "views": 107100,
+      "baselineAvg": 38032.2,
+      "multiple": 2.82,
+      "genre": "folk",
+      "market": "US",
+      "unsignedConfidence": "unclear (no explicit bio signal \u2014 spot check)",
+      "postedDaysAgo": 1,
+      "followerCount": null
+    }
+  ]
 }
